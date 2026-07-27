@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type React from "react";
+import { useState } from "react";
 
 const navItems = [
   { label: "Dashboard", href: "/user/dashboard", icon: "grid" },
@@ -19,6 +20,7 @@ export default function DashboardShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-950">
@@ -55,13 +57,14 @@ export default function DashboardShell({
         </nav>
 
         <div className="border-t border-slate-200 p-3">
-          <Link
-            href="/"
+          <button
             className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-700 transition hover:bg-red-50 hover:text-red-600"
+            type="button"
+            onClick={() => setShowLogoutModal(true)}
           >
             <DashboardIcon name="logout" />
             Logout
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -83,6 +86,39 @@ export default function DashboardShell({
 
         <main className="mx-auto max-w-6xl px-5 py-6 lg:px-6">{children}</main>
       </div>
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 px-4 py-6 backdrop-blur-[8px]">
+          <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-5 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-950">Logout?</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Are you sure you want to logout?
+                </p>
+              </div>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                <DashboardIcon name="logout" />
+              </span>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                className="h-10 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+              <Link
+                className="inline-flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-bold text-white transition hover:bg-red-700"
+                href="/"
+              >
+                Logout
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
