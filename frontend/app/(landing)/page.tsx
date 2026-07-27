@@ -185,7 +185,7 @@ export default function Home() {
             <p className="mx-auto mb-4 w-fit rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white/85 backdrop-blur">
               Learn without limits
             </p>
-            <h1 className="text-[36px] font-black leading-[1.02] tracking-[-0.02em] drop-shadow-lg md:text-[52px]">
+            <h1 className="text-[36px] font-bold leading-[1.02] tracking-[-0.02em] drop-shadow-lg md:text-[52px]">
               Find Your Perfect Course
               <br />
               on EduFlow
@@ -234,7 +234,7 @@ export default function Home() {
                   <p className="text-[10px] font-bold uppercase text-blue-600">
                     {course.category}
                   </p>
-                  <h3 className="mt-1 min-h-9 text-[15px] font-extrabold leading-[1.2] text-slate-950">
+                  <h3 className="mt-1 min-h-9 text-[15px] font-bold leading-[1.2] text-slate-950">
                     {course.title}
                   </h3>
                   <div className="mt-3 flex items-center gap-2 text-[11px]">
@@ -247,24 +247,24 @@ export default function Home() {
                   </div>
                   <div className="mt-4 grid grid-cols-3 rounded-lg bg-slate-50 p-3 text-center text-[11px] text-slate-500">
                     <div>
-                      <div className="font-black text-slate-950">
+                      <div className="font-bold text-slate-950">
                         {course.rating}
                       </div>
                       <div>Rating</div>
                     </div>
                     <div className="border-x border-slate-200">
-                      <div className="font-black text-slate-950">
+                      <div className="font-bold text-slate-950">
                         {course.lessons.split(" ")[0]}
                       </div>
                       <div>Lessons</div>
                     </div>
                     <div>
-                      <div className="font-black text-slate-950">8</div>
+                      <div className="font-bold text-slate-950">8</div>
                       <div>Weeks</div>
                     </div>
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase text-blue-600">
+                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase text-blue-600">
                       {course.level}
                     </span>
                     <a
@@ -297,10 +297,10 @@ export default function Home() {
                   className="landing-card reveal rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
-                  <div className={`text-xl font-black ${item.color}`}>
+                  <div className={`text-xl font-bold ${item.color}`}>
                     {item.number}
                   </div>
-                  <h3 className="mt-4 text-[14px] font-extrabold">
+                  <h3 className="mt-4 text-[14px] font-bold">
                     {item.title}
                   </h3>
                   <p className="mt-2 text-[11px] leading-5 text-slate-500">
@@ -310,10 +310,10 @@ export default function Home() {
               ))}
             </div>
             <div className="reveal flex flex-col justify-center rounded-2xl border border-slate-200 bg-white p-7 shadow-sm lg:p-8">
-              <p className="text-[10px] font-black uppercase tracking-wide text-blue-600">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
                 Why EduFlow
               </p>
-              <h2 className="mt-2 text-[28px] font-black leading-[1.05] tracking-[-0.02em]">
+              <h2 className="mt-2 text-[28px] font-bold leading-[1.05] tracking-[-0.02em]">
                 One Free, Fully Packed
                 <br />
                 Learning Platform
@@ -365,10 +365,10 @@ export default function Home() {
                   className="landing-card reveal rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm"
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
-                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-sm font-black text-blue-600">
+                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
                     {item.number}
                   </div>
-                  <h3 className="mt-4 text-[14px] font-extrabold">
+                  <h3 className="mt-4 text-[14px] font-bold">
                     {item.title}
                   </h3>
                   <p className="mt-2 text-[11px] leading-5 text-slate-500">
@@ -394,11 +394,11 @@ export default function Home() {
                 style={{ animationDelay: `${index * 80}ms` }}
               >
                 {plan.featured ? (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-3 py-1 text-[10px] font-black text-slate-950">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-3 py-1 text-[10px] font-bold text-slate-950">
                     Popular
                   </div>
                 ) : null}
-                <h3 className="text-[15px] font-black">{plan.name}</h3>
+                <h3 className="text-[15px] font-bold">{plan.name}</h3>
                 <p
                   className={`mt-2 min-h-10 text-[11px] leading-5 ${
                     plan.featured ? "text-blue-50" : "text-slate-500"
@@ -406,7 +406,7 @@ export default function Home() {
                 >
                   {plan.text}
                 </p>
-                <div className="mt-4 text-[25px] font-black tracking-[-0.02em]">
+                <div className="mt-4 text-[25px] font-bold tracking-[-0.02em]">
                   {plan.price}
                 </div>
                 <ul
@@ -420,7 +420,7 @@ export default function Home() {
                 </ul>
                 <a
                   href="#courses"
-                  className={`mt-7 inline-flex w-full justify-center rounded-lg px-4 py-2.5 text-[11px] font-black transition hover:-translate-y-0.5 ${
+                  className={`mt-7 inline-flex w-full justify-center rounded-lg px-4 py-2.5 text-[11px] font-bold transition hover:-translate-y-0.5 ${
                     plan.featured
                       ? "bg-white text-blue-600"
                       : "bg-blue-600 text-white hover:bg-blue-700"
@@ -450,12 +450,12 @@ export default function Home() {
                 </p>
                 <div className="mt-5 flex items-center gap-3">
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full ${item.color} text-[12px] font-black text-white`}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full ${item.color} text-[12px] font-bold text-white`}
                   >
                     {item.name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="text-[13px] font-black">{item.name}</h3>
+                    <h3 className="text-[13px] font-bold">{item.name}</h3>
                     <p className="text-[11px] text-slate-500">{item.role}</p>
                   </div>
                 </div>
@@ -480,10 +480,10 @@ function SectionTitle({
 }) {
   return (
     <div className="reveal text-center">
-      <p className="text-[10px] font-black uppercase tracking-wide text-blue-600">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
         {eyebrow}
       </p>
-      <h2 className="mt-2 text-[28px] font-black tracking-[-0.02em] text-slate-950">
+      <h2 className="mt-2 text-[28px] font-bold tracking-[-0.02em] text-slate-950">
         {title}
       </h2>
       {subtitle ? (
