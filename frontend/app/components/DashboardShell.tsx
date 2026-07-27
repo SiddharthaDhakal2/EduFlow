@@ -8,7 +8,7 @@ const navItems = [
   { label: "Dashboard", href: "/user/dashboard", icon: "grid" },
   { label: "Courses", href: "/user/courses", icon: "book" },
   { label: "My Learning", href: "/user/learning", icon: "cap" },
-  { label: "Membership", href: "/user/membership", icon: "card" },
+  { label: "Purchases", href: "/user/membership", icon: "card" },
   { label: "Announcements", href: "/user/announcements", icon: "megaphone" },
   { label: "Profile", href: "/user/profile", icon: "user" },
 ];
@@ -30,7 +30,7 @@ export default function DashboardShell({
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
             <BookIcon />
           </span>
-          <span className="text-lg font-black">EduFlow</span>
+          <span className="text-lg font-bold">EduFlow</span>
         </Link>
 
         <nav className="flex-1 space-y-2 px-3 py-5">
@@ -71,12 +71,12 @@ export default function DashboardShell({
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
               <BookIcon />
             </span>
-            <span className="font-black">EduFlow</span>
+            <span className="font-bold">EduFlow</span>
           </Link>
-          <div className="hidden text-base font-black lg:block">
+          <div className="hidden text-base font-bold lg:block">
             EduFlow Learning Platform
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
             S
           </div>
         </header>
