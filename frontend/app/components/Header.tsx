@@ -28,7 +28,7 @@ export default function Header() {
               />
             </svg>
           </span>
-          <span className="text-lg font-extrabold text-slate-900">
+          <span className="text-lg font-bold text-slate-900">
             EduFlow
           </span>
         </Link>

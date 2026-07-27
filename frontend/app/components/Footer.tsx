@@ -29,7 +29,7 @@ const footerLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-950 text-white">
+    <footer className="border-t border-slate-200 bg-blue-600 text-white">
       <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="grid gap-8 md:grid-cols-[1.2fr_2fr]">
           <div>
@@ -57,7 +57,7 @@ export default function Footer() {
                   />
                 </svg>
               </span>
-              <span className="text-xl font-extrabold">EduFlow</span>
+              <span className="text-xl font-bold">EduFlow</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
               Learn practical skills with focused courses, clear learning paths,
@@ -80,7 +80,7 @@ export default function Footer() {
           <div className="grid gap-7 sm:grid-cols-3">
             {footerLinks.map((group) => (
               <div key={group.title}>
-                <h3 className="text-sm font-extrabold text-white">
+                <h3 className="text-sm font-bold text-white">
                   {group.title}
                 </h3>
                 <ul className="mt-4 space-y-3 text-sm text-slate-400">
