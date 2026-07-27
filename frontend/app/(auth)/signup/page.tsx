@@ -63,11 +63,11 @@ export default function SignupPage() {
                     />
                   </svg>
                 </span>
-                <span className="text-xl font-black">EduFlow</span>
+                <span className="text-xl font-bold">EduFlow</span>
               </Link>
 
               <div>
-                <h1 className="max-w-sm text-[34px] font-black leading-tight tracking-[-0.03em]">
+                <h1 className="max-w-sm text-[34px] font-bold leading-tight tracking-[-0.03em]">
                   Start learning today, for free.
                 </h1>
                 <p className="mt-5 max-w-sm text-sm leading-6 text-blue-50">
@@ -78,7 +78,7 @@ export default function SignupPage() {
                 <ul className="mt-6 space-y-3 text-sm text-blue-50">
                   {benefits.map((item) => (
                     <li key={item} className="flex items-center gap-3">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/35 text-[10px] font-black">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/35 text-[10px] font-bold">
                         OK
                       </span>
                       {item}
@@ -95,12 +95,12 @@ export default function SignupPage() {
                 <p className="text-sm font-bold uppercase text-blue-600">
                   EduFlow
                 </p>
-                <h1 className="mt-2 text-3xl font-black tracking-[-0.03em]">
+                <h1 className="mt-2 text-3xl font-bold tracking-[-0.03em]">
                   Start learning today, for free.
                 </h1>
               </div>
 
-              <h2 className="text-[28px] font-black tracking-[-0.03em]">
+              <h2 className="text-[28px] font-bold tracking-[-0.03em]">
                 Create your account
               </h2>
               <p className="mt-2 text-sm text-slate-500">
@@ -171,7 +171,7 @@ export default function SignupPage() {
 
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
+                  className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
                 >
                   Create Account
                 </button>
@@ -179,7 +179,7 @@ export default function SignupPage() {
 
               <p className="mt-4 text-center text-sm text-slate-500">
                 Already have an account?{" "}
-                <Link href="/login" className="font-black text-blue-600">
+                <Link href="/login" className="font-bold text-blue-600">
                   Sign in
                 </Link>
               </p>

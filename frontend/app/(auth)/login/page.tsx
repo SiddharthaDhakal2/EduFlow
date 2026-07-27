@@ -65,11 +65,11 @@ export default function LoginPage() {
                     />
                   </svg>
                 </span>
-                <span className="text-xl font-black">EduFlow</span>
+                <span className="text-xl font-bold">EduFlow</span>
               </Link>
 
               <div>
-                <h1 className="max-w-sm text-[34px] font-black leading-tight tracking-[-0.03em]">
+                <h1 className="max-w-sm text-[34px] font-bold leading-tight tracking-[-0.03em]">
                   Welcome back to your learning journey.
                 </h1>
                 <p className="mt-5 max-w-sm text-sm leading-6 text-blue-50">
@@ -80,7 +80,7 @@ export default function LoginPage() {
                 <div className="mt-8 flex gap-8">
                   {stats.map((item) => (
                     <div key={item.label}>
-                      <div className="text-2xl font-black">{item.value}</div>
+                      <div className="text-2xl font-bold">{item.value}</div>
                       <div className="mt-1 text-xs text-blue-100">
                         {item.label}
                       </div>
@@ -97,12 +97,12 @@ export default function LoginPage() {
                 <p className="text-sm font-bold uppercase text-blue-600">
                   EduFlow
                 </p>
-                <h1 className="mt-2 text-3xl font-black tracking-[-0.03em]">
+                <h1 className="mt-2 text-3xl font-bold tracking-[-0.03em]">
                   Welcome back.
                 </h1>
               </div>
 
-              <h2 className="text-[28px] font-black tracking-[-0.03em]">
+              <h2 className="text-[28px] font-bold tracking-[-0.03em]">
                 Sign in to EduFlow
               </h2>
               <p className="mt-2 text-sm text-slate-500">
@@ -140,7 +140,7 @@ export default function LoginPage() {
 
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
+                  className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
                 >
                   Sign In
                 </button>
@@ -148,7 +148,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={handleAdminLogin}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:-translate-y-0.5 hover:border-slate-950"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:border-blue-600"
                 >
                   Login as Admin
                 </button>
@@ -156,7 +156,7 @@ export default function LoginPage() {
 
               <p className="mt-5 text-center text-sm text-slate-500">
                 Don&apos;t have an account?{" "}
-                <Link href="/signup" className="font-black text-blue-600">
+                <Link href="/signup" className="font-bold text-blue-600">
                   Create one free
                 </Link>
               </p>
