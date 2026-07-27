@@ -9,7 +9,7 @@ const navItems = [
   { label: "Dashboard", href: "/user/dashboard", icon: "grid" },
   { label: "Courses", href: "/user/courses", icon: "book" },
   { label: "My Learning", href: "/user/learning", icon: "cap" },
-  { label: "Purchases", href: "/user/membership", icon: "card" },
+  { label: "Membership", href: "/user/membership", icon: "card" },
   { label: "Announcements", href: "/user/announcements", icon: "megaphone" },
   { label: "Profile", href: "/user/profile", icon: "user" },
 ];
