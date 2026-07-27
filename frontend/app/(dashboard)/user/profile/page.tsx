@@ -2,6 +2,16 @@ export const metadata = {
   title: "My Profile - EduFlow",
 };
 
+const today = "2026-07-28";
+
+const membershipPayment = {
+  paid: true,
+  startDate: "2026-01-15",
+  expiryDate: "2027-01-15",
+};
+
+const hasActiveMembership = membershipPayment.paid && membershipPayment.expiryDate >= today;
+
 export default function ProfilePage() {
   return (
     <div className="max-w-4xl space-y-5">
@@ -24,8 +34,12 @@ export default function ProfilePage() {
               Siddhartha Dhakal
             </h2>
             <p className="text-sm text-slate-500">student@eduflow.com</p>
-            <span className="mt-1 inline-flex rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">
-              Active Member
+            <span
+              className={`mt-1 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold text-white ${
+                hasActiveMembership ? "bg-emerald-600" : "bg-slate-950"
+              }`}
+            >
+              {hasActiveMembership ? "Active Member" : "Not Active"}
             </span>
           </div>
         </div>
@@ -54,27 +68,31 @@ export default function ProfilePage() {
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <SectionTitle icon={<CardIcon />} title="Membership Details" />
 
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          <div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <CalendarIcon />
-              <span>Member Since</span>
+        {membershipPayment.paid ? (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <CalendarIcon />
+                <span>Member Since</span>
+              </div>
+              <p className="mt-3 text-sm font-bold text-slate-950">
+                {membershipPayment.startDate}
+              </p>
             </div>
-            <p className="mt-3 text-sm font-bold text-slate-950">
-              2025-01-15
-            </p>
-          </div>
 
-          <div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <CalendarIcon />
-              <span>Membership Expires</span>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <CalendarIcon />
+                <span>Membership Expires</span>
+              </div>
+              <p className="mt-3 text-sm font-bold text-slate-950">
+                {membershipPayment.expiryDate}
+              </p>
             </div>
-            <p className="mt-3 text-sm font-bold text-slate-950">
-              2027-01-15
-            </p>
           </div>
-        </div>
+        ) : (
+          <div className="mt-6" />
+        )}
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
