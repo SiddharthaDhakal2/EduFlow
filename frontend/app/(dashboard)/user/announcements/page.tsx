@@ -32,7 +32,7 @@ export default function AnnouncementsPage() {
   return (
     <div className="max-w-5xl space-y-5">
       <section>
-        <h1 className="text-2xl font-black tracking-[-0.02em] text-slate-950">
+        <h1 className="text-2xl font-bold tracking-[-0.02em] text-slate-950">
           Announcements
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -41,7 +41,7 @@ export default function AnnouncementsPage() {
       </section>
 
       <section>
-        <div className="mb-3 flex items-center gap-2 text-sm font-black text-slate-950">
+        <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-950">
           <PinIcon />
           <h2>Pinned Announcements</h2>
         </div>
@@ -58,7 +58,7 @@ export default function AnnouncementsPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-black text-slate-950">
+        <h2 className="mb-3 text-sm font-bold text-slate-950">
           All Announcements
         </h2>
 
@@ -95,11 +95,11 @@ function AnnouncementCard({
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-base font-black text-slate-950">
+        <h3 className="text-base font-bold text-slate-950">
           {announcement.title}
         </h3>
         {pinned ? (
-          <span className="inline-flex items-center gap-1 rounded-md bg-slate-950 px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">
             <PinIcon small />
             Pinned
           </span>

@@ -16,6 +16,8 @@ const courses = [
     category: "Web Development",
     lessons: "5 lessons",
     instructor: "Sarah Johnson",
+    access: "Free after login",
+    price: "",
     image:
       "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80",
     description:
@@ -26,6 +28,8 @@ const courses = [
     category: "App Development",
     lessons: "4 lessons",
     instructor: "Michael Chen",
+    access: "Free after login",
+    price: "",
     image:
       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
     description:
@@ -36,6 +40,8 @@ const courses = [
     category: "Python",
     lessons: "4 lessons",
     instructor: "Dr. Emily Watson",
+    access: "Paid one-time",
+    price: "NPR 2,499",
     image:
       "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80",
     description:
@@ -46,6 +52,8 @@ const courses = [
     category: "Java",
     lessons: "4 lessons",
     instructor: "David Kumar",
+    access: "Paid one-time",
+    price: "NPR 1,999",
     image:
       "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=900&q=80",
     description:
@@ -56,6 +64,8 @@ const courses = [
     category: "Web Development",
     lessons: "3 lessons",
     instructor: "Alex Martinez",
+    access: "Paid one-time",
+    price: "NPR 1,499",
     image:
       "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=900&q=80",
     description:
@@ -66,6 +76,8 @@ const courses = [
     category: "App Development",
     lessons: "3 lessons",
     instructor: "Lisa Park",
+    access: "Paid one-time",
+    price: "NPR 1,999",
     image:
       "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=900&q=80",
     description:
@@ -81,7 +93,7 @@ export default function CoursesPage() {
   return (
     <div className="space-y-5">
       <section>
-        <h1 className="text-2xl font-black tracking-[-0.02em] text-slate-950">
+        <h1 className="text-2xl font-bold tracking-[-0.02em] text-slate-950">
           All Courses
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -108,7 +120,7 @@ export default function CoursesPage() {
               key={category}
               className={`rounded-full border px-3 py-1.5 text-xs font-bold transition ${
                 index === 0
-                  ? "border-slate-950 bg-slate-950 text-white"
+                  ? "border-blue-600 bg-blue-600 text-white"
                   : "border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:text-blue-600"
               }`}
               type="button"
@@ -135,7 +147,7 @@ export default function CoursesPage() {
               </span>
             </div>
             <div className="p-5">
-              <h2 className="min-h-10 text-base font-black leading-tight text-slate-950">
+              <h2 className="min-h-10 text-base font-bold leading-tight text-slate-950">
                 {course.title}
               </h2>
               <p className="mt-4 min-h-14 text-xs leading-5 text-slate-500">
@@ -148,11 +160,19 @@ export default function CoursesPage() {
               <p className="mt-3 text-xs text-slate-500">
                 by {course.instructor}
               </p>
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${course.access === "Free after login" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>
+                  {course.access === "Free after login" ? "Free" : course.price}
+                </span>
+                <span className="text-xs font-semibold text-slate-500">
+                  {course.access === "Free after login" ? "Included" : "One-time"}
+                </span>
+              </div>
               <Link
                 href="/user/courses"
-                className="mt-4 inline-flex w-full justify-center rounded-lg bg-slate-950 px-4 py-2.5 text-xs font-black text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
+                className="mt-4 inline-flex w-full justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
               >
-                View Course
+                {course.access === "Free after login" ? "Start Course" : "Buy Course"}
               </Link>
             </div>
           </article>

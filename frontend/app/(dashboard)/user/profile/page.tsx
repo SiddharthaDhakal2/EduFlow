@@ -6,7 +6,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl space-y-5">
       <section>
-        <h1 className="text-2xl font-black tracking-[-0.02em] text-slate-950">
+        <h1 className="text-2xl font-bold tracking-[-0.02em] text-slate-950">
           My Profile
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -20,11 +20,11 @@ export default function ProfilePage() {
             S
           </div>
           <div>
-            <h2 className="text-xl font-black leading-tight text-slate-950">
+            <h2 className="text-xl font-bold leading-tight text-slate-950">
               Siddhartha Dhakal
             </h2>
             <p className="text-sm text-slate-500">student@eduflow.com</p>
-            <span className="mt-1 inline-flex rounded-md bg-slate-950 px-2 py-0.5 text-[10px] font-bold text-white">
+            <span className="mt-1 inline-flex rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white">
               Active Member
             </span>
           </div>
@@ -43,7 +43,7 @@ export default function ProfilePage() {
           <Field label="Email Address" defaultValue="student@eduflow.com" />
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-950 px-3 py-2 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
           >
             <SaveIcon />
             Save Changes
@@ -60,7 +60,7 @@ export default function ProfilePage() {
               <CalendarIcon />
               <span>Member Since</span>
             </div>
-            <p className="mt-3 text-sm font-black text-slate-950">
+            <p className="mt-3 text-sm font-bold text-slate-950">
               2025-01-15
             </p>
           </div>
@@ -70,7 +70,7 @@ export default function ProfilePage() {
               <CalendarIcon />
               <span>Membership Expires</span>
             </div>
-            <p className="mt-3 text-sm font-black text-slate-950">
+            <p className="mt-3 text-sm font-bold text-slate-950">
               2027-01-15
             </p>
           </div>
@@ -90,7 +90,7 @@ export default function ProfilePage() {
           <Field label="Confirm New Password" type="password" />
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-md bg-slate-950 px-3 py-2 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
+            className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
           >
             <LockIcon small />
             Change Password
@@ -112,7 +112,7 @@ function SectionTitle({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm font-black text-slate-950">
+      <div className="flex items-center gap-2 text-sm font-bold text-slate-950">
         {icon}
         <h2>{title}</h2>
       </div>

@@ -45,7 +45,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <section>
-        <h1 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+        <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">
           Welcome, Siddhartha!
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -56,17 +56,17 @@ export default function DashboardPage() {
       <section className="rounded-xl border border-emerald-300 bg-emerald-50/60 p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-sm font-black text-slate-900">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
               <span className="h-3 w-4 rounded-sm border-2 border-slate-900" />
               Membership Status
             </div>
-            <span className="mt-2 inline-flex rounded-md bg-slate-950 px-2.5 py-1 text-xs font-bold text-white">
+            <span className="mt-2 inline-flex rounded-md bg-blue-600 px-2.5 py-1 text-xs font-bold text-white">
               Not Active
             </span>
           </div>
           <Link
             href="/#pricing"
-            className="inline-flex justify-center rounded-lg bg-slate-950 px-8 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
+            className="inline-flex justify-center rounded-lg bg-blue-600 px-8 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
           >
             Buy Membership
           </Link>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
                 <p className="text-xs font-semibold text-slate-500">
                   {item.title}
                 </p>
-                <div className="mt-7 text-3xl font-black text-slate-950">
+                <div className="mt-7 text-3xl font-bold text-slate-950">
                   {item.value}
                 </div>
                 <p className="mt-1 text-xs text-slate-400">{item.detail}</p>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl font-black tracking-[-0.02em]">
+          <h2 className="text-2xl font-bold tracking-[-0.02em]">
             Recently Added Courses
           </h2>
           <Link
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-700">
                   {course.category}
                 </span>
-                <h3 className="mt-4 text-base font-black text-slate-950">
+                <h3 className="mt-4 text-base font-bold text-slate-950">
                   {course.title}
                 </h3>
                 <p className="mt-5 text-sm text-slate-500">

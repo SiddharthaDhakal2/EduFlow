@@ -35,7 +35,7 @@ export default function MyLearningPage() {
   return (
     <div className="space-y-6">
       <section>
-        <h1 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+        <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">
           My Learning
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -44,7 +44,7 @@ export default function MyLearningPage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-2xl font-black tracking-[-0.02em]">
+        <h2 className="mb-4 text-2xl font-bold tracking-[-0.02em]">
           In Progress
         </h2>
 
@@ -63,7 +63,7 @@ export default function MyLearningPage() {
                 <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-700">
                   {course.category}
                 </span>
-                <h3 className="mt-3 text-base font-black text-slate-950">
+                <h3 className="mt-3 text-base font-bold text-slate-950">
                   {course.title}
                 </h3>
                 <p className="mt-3 text-sm text-slate-500">
@@ -77,7 +77,7 @@ export default function MyLearningPage() {
                   </div>
                   <div className="h-2 rounded-full bg-slate-200">
                     <div
-                      className="h-full rounded-full bg-slate-950"
+                      className="h-full rounded-full bg-blue-600"
                       style={{ width: `${course.progress}%` }}
                     />
                   </div>
@@ -85,7 +85,7 @@ export default function MyLearningPage() {
 
                 <Link
                   href="/user/courses"
-                  className="mt-4 inline-flex w-full justify-center rounded-lg bg-slate-950 px-4 py-2.5 text-xs font-black text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
+                  className="mt-4 inline-flex w-full justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
                 >
                   Continue Learning
                 </Link>
