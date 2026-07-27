@@ -59,7 +59,7 @@ export default function Footer() {
               </span>
               <span className="text-xl font-bold">EduFlow</span>
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
+            <p className="mt-4 max-w-xs text-sm leading-6 text-blue-50/85">
               Learn practical skills with focused courses, clear learning paths,
               and a simple platform built for steady progress.
             </p>
@@ -69,7 +69,7 @@ export default function Footer() {
                   key={item}
                   href="#home"
                   aria-label={`EduFlow social ${item}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-xs font-bold text-slate-200 transition hover:-translate-y-0.5 hover:border-blue-500 hover:bg-blue-600"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-white/15"
                 >
                   {item}
                 </a>
@@ -83,7 +83,7 @@ export default function Footer() {
                 <h3 className="text-sm font-bold text-white">
                   {group.title}
                 </h3>
-                <ul className="mt-4 space-y-3 text-sm text-slate-400">
+                <ul className="mt-4 space-y-3 text-sm text-blue-50/85">
                   {group.links.map((link) => (
                     <li key={link.label}>
                       <Link
@@ -100,13 +100,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-9 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-9 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-blue-50/85 sm:flex-row sm:items-center sm:justify-between">
           <p>(c) {new Date().getFullYear()} EduFlow. All rights reserved.</p>
           <div className="flex gap-5">
-            <a href="#home" className="transition hover:text-white">
+            <a href="#home" className="rounded-md bg-white px-2 py-1 font-semibold text-blue-600 transition hover:bg-blue-50">
               Privacy
             </a>
-            <a href="#home" className="transition hover:text-white">
+            <a href="#home" className="rounded-md bg-white px-2 py-1 font-semibold text-blue-600 transition hover:bg-blue-50">
               Terms
             </a>
           </div>
