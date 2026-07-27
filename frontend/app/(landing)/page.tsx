@@ -1,93 +1,79 @@
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import TestimonialsCarousel from "./TestimonialsCarousel";
 
 const courses = [
   {
     title: "Full-Stack Mastery: MERN",
     category: "Web Development",
+    description: "Build complete web applications with MongoDB, Express, React, and Node.js.",
+    instructor: "Sarah Johnson",
     image:
       "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=900&q=80",
-    rating: "4.9",
-    lessons: "42 lessons",
+    lessons: 42,
+    duration: "12 hours",
     level: "Advanced",
-    tag: "Popular",
+    access: "Paid",
   },
   {
     title: "Modern UI/UX with Figma",
     category: "Design",
+    description: "Design clean interfaces, reusable components, and modern product flows.",
+    instructor: "Priyanka Sharma",
     image:
       "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=900&q=80",
-    rating: "4.8",
-    lessons: "31 lessons",
+    lessons: 31,
+    duration: "9 hours",
     level: "Intermediate",
-    tag: "New",
+    access: "Free",
   },
   {
     title: "Video Editing for Creators",
     category: "Media",
+    description: "Learn editing workflow, cuts, color, audio, and export for online content.",
+    instructor: "Rohan Chettri",
     image:
       "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=900&q=80",
-    rating: "4.7",
-    lessons: "28 lessons",
+    lessons: 28,
+    duration: "8 hours",
     level: "Beginner",
-    tag: "Trending",
+    access: "Free",
   },
   {
     title: "JavaScript Deep Dive",
     category: "Programming",
+    description: "Master JavaScript fundamentals, async patterns, DOM work, and practical projects.",
+    instructor: "Alex Martinez",
     image:
       "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=80",
-    rating: "4.9",
-    lessons: "36 lessons",
+    lessons: 36,
+    duration: "10 hours",
     level: "Intermediate",
-    tag: "Hot",
+    access: "Paid",
   },
   {
     title: "Freelancing from Scratch",
     category: "Career",
+    description: "Set up your portfolio, find clients, price your work, and manage projects.",
+    instructor: "Lisa Park",
     image:
       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-    rating: "4.8",
-    lessons: "24 lessons",
+    lessons: 24,
+    duration: "7 hours",
     level: "Beginner",
-    tag: "Starter",
+    access: "Paid",
   },
   {
     title: "AI Tools for Productivity",
     category: "AI",
+    description: "Use modern AI tools to plan, write, research, automate, and work faster.",
+    instructor: "Dr. Emily Watson",
     image:
       "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80",
-    rating: "4.9",
-    lessons: "20 lessons",
+    lessons: 20,
+    duration: "6 hours",
     level: "Beginner",
-    tag: "Featured",
-  },
-];
-
-const platformCards = [
-  {
-    number: "01",
-    title: "Comprehensive Library",
-    text: "Access well-organized courses across technology, design, business, and career skills.",
-    color: "text-blue-600",
-  },
-  {
-    number: "02",
-    title: "Always Free Access",
-    text: "Start learning without hidden setup fees or complicated enrollment steps.",
-    color: "text-emerald-600",
-  },
-  {
-    number: "03",
-    title: "High Quality Resources",
-    text: "Use structured lessons, practical projects, and clear materials built for progress.",
-    color: "text-violet-600",
-  },
-  {
-    number: "04",
-    title: "Updated Training Paths",
-    text: "Follow fresh course paths aligned with current tools and workplace needs.",
-    color: "text-orange-500",
+    access: "Free",
   },
 ];
 
@@ -118,53 +104,37 @@ const plans = [
   {
     name: "Starter",
     price: "NPR 0",
+    period: "",
     text: "Perfect for exploring EduFlow for the first time.",
-    features: ["Access to 5 free courses", "Community Q&A access", "Progress tracking"],
-    cta: "Start Free",
+    features: ["Access to 2 free courses", "Community forum access", "Progress tracking"],
+    cta: "Get Started Free",
   },
   {
-    name: "Pro Plan",
+    name: "Pro Yearly",
     price: "NPR 2,999",
-    text: "Everything you need to learn faster, earn certificates, and build projects.",
+    period: "/ year",
+    text: "For serious learners who want full access and certifications.",
     features: [
       "Unlimited course access",
-      "Verified certificates",
-      "Priority mentor support",
-      "Career-ready projects",
+      "Industry certifications",
+      "Downloadable resources",
+      "1 year unlimited access",
     ],
-    cta: "Start Pro Plan",
+    cta: "Start Yearly Plan",
     featured: true,
   },
   {
     name: "Monthly",
     price: "NPR 500",
-    text: "A flexible plan for short-term learning goals.",
-    features: ["Monthly course access", "Cancel anytime", "Email support"],
+    period: "/ month",
+    text: "Full pro access billed monthly.",
+    features: [
+      "Unlimited course access",
+      "Industry certifications",
+      "Downloadable resources",
+      "1 month unlimited access",
+    ],
     cta: "Start Monthly Plan",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Rohan Chettri",
-    role: "Web Developer",
-    color: "bg-blue-600",
-    quote:
-      "EduFlow helped me move step by step. The lessons were clear and the projects made everything easier to remember.",
-  },
-  {
-    name: "Priyanka",
-    role: "Designer",
-    color: "bg-violet-600",
-    quote:
-      "I finally understood UI design basics because the course examples were practical and easy to follow.",
-  },
-  {
-    name: "Ramesh Karki",
-    role: "Student",
-    color: "bg-pink-600",
-    quote:
-      "The platform made learning feel simple. I liked having everything in one clean place.",
   },
 ];
 
@@ -212,142 +182,63 @@ export default function Home() {
         </section>
 
         <section id="courses" className="mx-auto max-w-6xl px-4 py-14">
-          <SectionTitle eyebrow="Explore Courses" title="Featured Courses" />
+          <SectionTitle title="Featured Courses" />
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((course, index) => (
               <article
                 key={course.title}
-                className="landing-card reveal group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+                className="landing-card reveal group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
                 style={{ animationDelay: `${index * 70}ms` }}
               >
-                <div className="overflow-hidden">
+                <div className="relative h-44 overflow-hidden">
                   <div
-                    className="relative h-[160px] bg-cover bg-center transition duration-500 group-hover:scale-105"
+                    className="h-full bg-cover bg-center transition duration-500 group-hover:scale-105"
                     style={{ backgroundImage: `url(${course.image})` }}
-                  >
-                    <span className="absolute left-3 top-3 rounded-md bg-blue-600 px-2.5 py-1.5 text-[9px] font-bold uppercase text-white">
-                      {course.tag}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-[10px] font-bold uppercase text-blue-600">
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+                  <span className="absolute left-3 top-3 rounded-md bg-white/95 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm">
                     {course.category}
-                  </p>
-                  <h3 className="mt-1 min-h-9 text-[15px] font-bold leading-[1.2] text-slate-950">
-                    {course.title}
-                  </h3>
-                  <div className="mt-3 flex items-center gap-2 text-[11px]">
-                    <span className="rounded bg-amber-100 px-2 py-1 font-bold text-amber-700">
-                      Rated
-                    </span>
-                    <span className="font-semibold text-slate-500">
-                      {course.rating}
-                    </span>
-                  </div>
-                  <div className="mt-4 grid grid-cols-3 rounded-lg bg-slate-50 p-3 text-center text-[11px] text-slate-500">
-                    <div>
-                      <div className="font-bold text-slate-950">
-                        {course.rating}
-                      </div>
-                      <div>Rating</div>
-                    </div>
-                    <div className="border-x border-slate-200">
-                      <div className="font-bold text-slate-950">
-                        {course.lessons.split(" ")[0]}
-                      </div>
-                      <div>Lessons</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-950">8</div>
-                      <div>Weeks</div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase text-blue-600">
+                  </span>
+                  <span className={`absolute right-3 top-3 rounded-md px-2.5 py-1 text-xs font-bold shadow-sm ${course.access === "Free" ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"}`}>
+                    {course.access}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col p-4">
+                  <h3 className="line-clamp-2 min-h-10 overflow-hidden text-base font-bold leading-tight text-slate-950">{course.title}</h3>
+                  <p className="mt-2 line-clamp-2 min-h-10 overflow-hidden text-sm leading-5 text-slate-500">{course.description}</p>
+
+                  <div className="mt-3 border-t border-slate-100 pt-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="truncate text-sm font-semibold text-slate-800">{course.instructor}</p>
+                      <span className="shrink-0 rounded-md bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
                       {course.level}
-                    </span>
-                    <a
-                      href="#pricing"
-                      className="rounded-md bg-blue-600 px-4 py-2 text-[10px] font-bold text-white transition hover:bg-blue-700"
-                    >
-                      View Course
-                    </a>
+                      </span>
+                    </div>
                   </div>
+
+                  <div className="mt-3 flex items-center justify-between gap-3 text-xs font-semibold text-slate-500">
+                    <span>{course.lessons} lessons</span>
+                    <span>{course.duration}</span>
+                  </div>
+
+                  <a
+                    href={course.access === "Free" ? "#courses" : "#pricing"}
+                    className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
+                  >
+                    Enroll Now
+                  </a>
                 </div>
               </article>
             ))}
           </div>
           <div className="mt-8 text-center">
             <a
-              href="#pricing"
-              className="inline-flex rounded-lg border border-blue-600 px-5 py-2 text-[11px] font-bold text-blue-600 transition hover:-translate-y-0.5 hover:bg-blue-50"
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-lg border border-blue-600 px-5 py-2 text-sm font-bold text-blue-600 transition hover:-translate-y-0.5 hover:bg-blue-50"
             >
-              View All Courses -&gt;
+              View All Courses
+              <ArrowRightIcon />
             </a>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-14 pt-2">
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {platformCards.map((item, index) => (
-                <div
-                  key={item.title}
-                  className="landing-card reveal rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-                  style={{ animationDelay: `${index * 80}ms` }}
-                >
-                  <div className={`text-xl font-bold ${item.color}`}>
-                    {item.number}
-                  </div>
-                  <h3 className="mt-4 text-[14px] font-bold">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                    {item.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="reveal flex flex-col justify-center rounded-2xl border border-slate-200 bg-white p-7 shadow-sm lg:p-8">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
-                Why EduFlow
-              </p>
-              <h2 className="mt-2 text-[28px] font-bold leading-[1.05] tracking-[-0.02em]">
-                One Free, Fully Packed
-                <br />
-                Learning Platform
-              </h2>
-              <p className="mt-4 max-w-md text-[12px] leading-6 text-slate-500">
-                EduFlow makes learning accessible for all with a simple platform
-                that brings courses, resources, and progress together in one
-                place.
-              </p>
-              <ul className="mt-5 space-y-3 text-[12px] font-semibold text-slate-700">
-                <li>
-                  <span className="text-blue-600">OK</span> Practical courses
-                  with structured learning paths
-                </li>
-                <li>
-                  <span className="text-blue-600">OK</span> Progress tools that
-                  help learners stay consistent
-                </li>
-                <li>
-                  <span className="text-blue-600">OK</span> Certificates and
-                  project work for every major track
-                </li>
-                <li>
-                  <span className="text-blue-600">OK</span> A clean dashboard
-                  built for focused study
-                </li>
-              </ul>
-              <a
-                href="#courses"
-                className="mt-6 inline-flex w-fit rounded-lg bg-blue-600 px-5 py-2.5 text-[11px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-700"
-              >
-                Start Learning -&gt;
-              </a>
-            </div>
           </div>
         </section>
 
@@ -386,41 +277,51 @@ export default function Home() {
             {plans.map((plan, index) => (
               <div
                 key={plan.name}
-                className={`landing-card reveal relative rounded-xl border p-6 shadow-sm ${
+                className={`landing-card reveal relative flex min-h-[350px] flex-col rounded-xl border p-6 shadow-sm ${
                   plan.featured
-                    ? "scale-[1.02] border-blue-600 bg-blue-600 text-white shadow-blue-200"
+                    ? "scale-[1.03] border-blue-600 bg-blue-600 text-white shadow-xl shadow-blue-200"
                     : "border-slate-200 bg-white text-slate-950"
                 }`}
                 style={{ animationDelay: `${index * 80}ms` }}
               >
                 {plan.featured ? (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-3 py-1 text-[10px] font-bold text-slate-950">
-                    Popular
+                    Most Popular
                   </div>
                 ) : null}
-                <h3 className="text-[15px] font-bold">{plan.name}</h3>
+                <h3 className="text-base font-bold">{plan.name}</h3>
                 <p
-                  className={`mt-2 min-h-10 text-[11px] leading-5 ${
+                  className={`mt-2 min-h-10 text-sm leading-5 ${
                     plan.featured ? "text-blue-50" : "text-slate-500"
                   }`}
                 >
                   {plan.text}
                 </p>
-                <div className="mt-4 text-[25px] font-bold tracking-[-0.02em]">
-                  {plan.price}
+                <div className="mt-6 flex items-end gap-1">
+                  <span className="text-3xl font-bold tracking-[-0.02em]">
+                    {plan.price}
+                  </span>
+                  {plan.period ? (
+                    <span className={`pb-1 text-sm ${plan.featured ? "text-blue-50" : "text-slate-500"}`}>
+                      {plan.period}
+                    </span>
+                  ) : null}
                 </div>
                 <ul
-                  className={`mt-5 space-y-3 text-[12px] ${
-                    plan.featured ? "text-white" : "text-slate-600"
+                  className={`mt-7 space-y-3 text-sm ${
+                    plan.featured ? "text-blue-50" : "text-slate-600"
                   }`}
                 >
                   {plan.features.map((feature) => (
-                    <li key={feature}>OK {feature}</li>
+                    <li key={feature} className="flex items-center gap-3">
+                      <PricingCheckIcon />
+                      <span>{feature}</span>
+                    </li>
                   ))}
                 </ul>
                 <a
                   href="#courses"
-                  className={`mt-7 inline-flex w-full justify-center rounded-lg px-4 py-2.5 text-[11px] font-bold transition hover:-translate-y-0.5 ${
+                  className={`mt-auto inline-flex w-full justify-center rounded-lg px-4 py-3 text-sm font-bold transition hover:-translate-y-0.5 ${
                     plan.featured
                       ? "bg-white text-blue-600"
                       : "bg-blue-600 text-white hover:bg-blue-700"
@@ -435,33 +336,7 @@ export default function Home() {
 
         <section className="mx-auto max-w-6xl px-4 pb-16 pt-3">
           <SectionTitle eyebrow="Testimonials" title="What Our Learners Say" />
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            {testimonials.map((item, index) => (
-              <article
-                key={item.name}
-                className="landing-card reveal rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-                style={{ animationDelay: `${index * 80}ms` }}
-              >
-                <div className="text-[11px] font-bold uppercase tracking-wide text-amber-600">
-                  5 star review
-                </div>
-                <p className="mt-3 min-h-20 text-[12px] leading-6 text-slate-600">
-                  &quot;{item.quote}&quot;
-                </p>
-                <div className="mt-5 flex items-center gap-3">
-                  <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full ${item.color} text-[12px] font-bold text-white`}
-                  >
-                    {item.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="text-[13px] font-bold">{item.name}</h3>
-                    <p className="text-[11px] text-slate-500">{item.role}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+          <TestimonialsCarousel />
         </section>
       </main>
       <Footer />
@@ -474,15 +349,17 @@ function SectionTitle({
   title,
   subtitle,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   subtitle?: string;
 }) {
   return (
     <div className="reveal text-center">
-      <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
-        {eyebrow}
-      </p>
+      {eyebrow ? (
+        <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600">
+          {eyebrow}
+        </p>
+      ) : null}
       <h2 className="mt-2 text-[28px] font-bold tracking-[-0.02em] text-slate-950">
         {title}
       </h2>
@@ -492,5 +369,33 @@ function SectionTitle({
         </p>
       ) : null}
     </div>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function PricingCheckIcon() {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24">
+      <path
+        d="m5 12 4 4L19 6"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    </svg>
   );
 }
