@@ -5,32 +5,12 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-5 md:px-8">
         <Link href="/" className="flex w-fit items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25">
-            <svg
-              aria-hidden="true"
-              className="h-[18px] w-[18px]"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M5 5.75A2.75 2.75 0 0 1 7.75 3H19v14.5H7.75A2.75 2.75 0 0 0 5 20.25V5.75Z"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              />
-              <path
-                d="M5 5.75A2.75 2.75 0 0 0 2.25 3H2v14.5h.25A2.75 2.75 0 0 1 5 20.25M8.5 7H16M8.5 10.5H16"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-              />
-            </svg>
-          </span>
-          <span className="text-lg font-bold text-slate-900">
-            EduFlow
-          </span>
+          <img
+            alt="EduFlow"
+            className="h-10 w-10"
+            src="/eduflow-logo.svg"
+          />
+          <span className="text-lg font-bold text-slate-900">EduFlow</span>
         </Link>
 
         <nav className="hidden items-center gap-9 text-sm font-semibold text-slate-600 md:flex">

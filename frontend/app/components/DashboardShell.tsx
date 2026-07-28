@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { apiFetch, clearSession, getStoredUser, mediaUrl, type User } from "../lib/api";
+import { showToast } from "../lib/toast";
 
 const navItems = [
   { label: "Dashboard", href: "/user/dashboard", icon: "grid" },
@@ -20,7 +22,37 @@ export default function DashboardShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+
+  useEffect(() => {
+    function syncUser() {
+      const nextUser = getStoredUser();
+      setUser(nextUser);
+      if (!nextUser) router.push("/login");
+      if (nextUser?.role === "admin") router.push("/admin/dashboard");
+    }
+
+    syncUser();
+    window.addEventListener("eduflow-auth-updated", syncUser);
+    return () => window.removeEventListener("eduflow-auth-updated", syncUser);
+  }, [router]);
+
+  function logout() {
+    apiFetch("/auth/logout", { method: "POST" }).catch(() => {});
+    clearSession();
+    showToast("Logged out successfully.");
+    router.push("/");
+  }
+
+  if (user?.role !== "user") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-sm font-semibold text-slate-500">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-950">
@@ -29,9 +61,7 @@ export default function DashboardShell({
           href="/"
           className="flex h-14 items-center gap-2.5 border-b border-slate-200 px-5"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <BookIcon />
-          </span>
+          <img alt="EduFlow" className="h-8 w-8" src="/eduflow-logo.svg" />
           <span className="text-lg font-bold">EduFlow</span>
         </Link>
 
@@ -71,16 +101,18 @@ export default function DashboardShell({
       <div className="lg:pl-55">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-5 lg:px-6">
           <Link href="/" className="flex items-center gap-2.5 lg:hidden">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <BookIcon />
-            </span>
+            <img alt="EduFlow" className="h-8 w-8" src="/eduflow-logo.svg" />
             <span className="font-bold">EduFlow</span>
           </Link>
           <div className="hidden text-base font-bold lg:block">
             EduFlow Learning Platform
           </div>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-            S
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-sm font-bold text-white">
+            {user?.profileImage ? (
+              <img alt={user.name} className="h-full w-full object-cover" src={mediaUrl(user.profileImage)} />
+            ) : (
+              user?.avatar || "U"
+            )}
           </div>
         </header>
 
@@ -109,43 +141,18 @@ export default function DashboardShell({
               >
                 Cancel
               </button>
-              <Link
+              <button
                 className="inline-flex h-10 items-center rounded-lg bg-red-600 px-4 text-sm font-bold text-white transition hover:bg-red-700"
-                href="/"
+                type="button"
+                onClick={logout}
               >
                 Logout
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-function BookIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      className="h-4.5 w-4.5"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M5 5.75A2.75 2.75 0 0 1 7.75 3H19v14.5H7.75A2.75 2.75 0 0 0 5 20.25V5.75Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-      <path
-        d="M5 5.75A2.75 2.75 0 0 0 2.25 3H2v14.5h.25A2.75 2.75 0 0 1 5 20.25M8.5 7H16M8.5 10.5H16"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
   );
 }
 

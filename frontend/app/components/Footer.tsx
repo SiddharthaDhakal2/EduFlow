@@ -22,7 +22,6 @@ const footerLinks = [
     links: [
       { label: "Sign In", href: "/login" },
       { label: "Get Started", href: "/signup" },
-      { label: "Dashboard", href: "/user/dashboard" },
     ],
   },
 ];
@@ -34,29 +33,7 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-[1.2fr_2fr]">
           <div>
             <Link href="/" className="flex w-fit items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25">
-                <svg
-                  aria-hidden="true"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M5 5.75A2.75 2.75 0 0 1 7.75 3H19v14.5H7.75A2.75 2.75 0 0 0 5 20.25V5.75Z"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M5 5.75A2.75 2.75 0 0 0 2.25 3H2v14.5h.25A2.75 2.75 0 0 1 5 20.25M8.5 7H16M8.5 10.5H16"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </span>
+              <img alt="EduFlow" className="h-9 w-9" src="/eduflow-logo.svg" />
               <span className="text-xl font-bold">EduFlow</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-blue-50/85">
