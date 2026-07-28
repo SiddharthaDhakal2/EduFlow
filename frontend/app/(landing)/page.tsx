@@ -1,81 +1,22 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import { apiFetch } from "../lib/api";
 import TestimonialsCarousel from "./TestimonialsCarousel";
 
-const courses = [
-  {
-    title: "Full-Stack Mastery: MERN",
-    category: "Web Development",
-    description: "Build complete web applications with MongoDB, Express, React, and Node.js.",
-    instructor: "Sarah Johnson",
-    image:
-      "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=900&q=80",
-    lessons: 42,
-    duration: "12 hours",
-    level: "Advanced",
-    access: "Paid",
-  },
-  {
-    title: "Modern UI/UX with Figma",
-    category: "Design",
-    description: "Design clean interfaces, reusable components, and modern product flows.",
-    instructor: "Priyanka Sharma",
-    image:
-      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=900&q=80",
-    lessons: 31,
-    duration: "9 hours",
-    level: "Intermediate",
-    access: "Free",
-  },
-  {
-    title: "Video Editing for Creators",
-    category: "Media",
-    description: "Learn editing workflow, cuts, color, audio, and export for online content.",
-    instructor: "Rohan Chettri",
-    image:
-      "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=900&q=80",
-    lessons: 28,
-    duration: "8 hours",
-    level: "Beginner",
-    access: "Free",
-  },
-  {
-    title: "JavaScript Deep Dive",
-    category: "Programming",
-    description: "Master JavaScript fundamentals, async patterns, DOM work, and practical projects.",
-    instructor: "Alex Martinez",
-    image:
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=80",
-    lessons: 36,
-    duration: "10 hours",
-    level: "Intermediate",
-    access: "Paid",
-  },
-  {
-    title: "Freelancing from Scratch",
-    category: "Career",
-    description: "Set up your portfolio, find clients, price your work, and manage projects.",
-    instructor: "Lisa Park",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-    lessons: 24,
-    duration: "7 hours",
-    level: "Beginner",
-    access: "Paid",
-  },
-  {
-    title: "AI Tools for Productivity",
-    category: "AI",
-    description: "Use modern AI tools to plan, write, research, automate, and work faster.",
-    instructor: "Dr. Emily Watson",
-    image:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80",
-    lessons: 20,
-    duration: "6 hours",
-    level: "Beginner",
-    access: "Free",
-  },
-];
+type FeaturedCourse = {
+  title: string;
+  category: string;
+  description: string;
+  instructor: string;
+  image: string;
+  lessons: number;
+  duration: string;
+  level: string;
+  access: "Free" | "Paid";
+};
 
 const benefits = [
   {
@@ -139,6 +80,12 @@ const plans = [
 ];
 
 export default function Home() {
+  const [courses, setCourses] = useState<FeaturedCourse[]>([]);
+
+  useEffect(() => {
+    apiFetch<{ courses: FeaturedCourse[] }>("/featured-courses").then((data) => setCourses(data.courses));
+  }, []);
+
   return (
     <>
       <Header />
