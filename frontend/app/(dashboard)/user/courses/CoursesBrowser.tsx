@@ -2,46 +2,58 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { courses } from "../../../lib/courseCatalog";
-import { readSavedCourseCategories } from "../../../lib/courseCategories";
+import { apiFetch, mediaUrl, type Course } from "../../../lib/api";
+import { fetchCourseCategories } from "../../../lib/courseCategories";
+import { showToast } from "../../../lib/toast";
 
 const accessFilters = ["All", "Free", "Paid"];
 
 export default function CoursesBrowser() {
-  const [categories, setCategories] = useState(["All Courses", ...readSavedCourseCategories()]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [categories, setCategories] = useState(["All Courses"]);
   const [selectedCategory, setSelectedCategory] = useState("All Courses");
   const [selectedAccess, setSelectedAccess] = useState("All");
   const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMembership, setHasMembership] = useState(false);
 
   useEffect(() => {
-    function refreshCategories() {
-      setCategories(["All Courses", ...readSavedCourseCategories()]);
+    async function refreshData() {
+      const [coursesData, categoriesData, membershipData] = await Promise.all([
+        apiFetch<{ courses: Course[] }>("/courses"),
+        fetchCourseCategories(),
+        apiFetch<{ membership: { active?: boolean } }>("/membership"),
+      ]);
+      setCourses(coursesData.courses);
+      setCategories(["All Courses", ...categoriesData.categories]);
+      setHasMembership(Boolean(membershipData.membership.active));
+      setIsLoading(false);
     }
 
-    refreshCategories();
-    window.addEventListener("course-categories-updated", refreshCategories);
-    window.addEventListener("storage", refreshCategories);
+    refreshData().catch(() => setIsLoading(false));
+    window.addEventListener("course-categories-updated", refreshData);
 
     return () => {
-      window.removeEventListener("course-categories-updated", refreshCategories);
-      window.removeEventListener("storage", refreshCategories);
+      window.removeEventListener("course-categories-updated", refreshData);
     };
   }, []);
 
   const filteredCourses = useMemo(() => {
-    return courses.filter((course) => {
-      const matchesCategory = selectedCategory === "All Courses" || course.category === selectedCategory;
-      const matchesAccess = selectedAccess === "All" || course.access === selectedAccess;
-      const normalizedQuery = query.trim().toLowerCase();
-      const matchesQuery =
-        normalizedQuery.length === 0 ||
-        course.title.toLowerCase().includes(normalizedQuery) ||
-        course.category.toLowerCase().includes(normalizedQuery) ||
-        course.instructor.toLowerCase().includes(normalizedQuery);
+    return [...courses]
+      .filter((course) => {
+        const matchesCategory = selectedCategory === "All Courses" || course.category === selectedCategory;
+        const matchesAccess = selectedAccess === "All" || course.access === selectedAccess;
+        const normalizedQuery = query.trim().toLowerCase();
+        const matchesQuery =
+          normalizedQuery.length === 0 ||
+          course.title.toLowerCase().includes(normalizedQuery) ||
+          course.category.toLowerCase().includes(normalizedQuery) ||
+          course.instructor.toLowerCase().includes(normalizedQuery);
 
-      return matchesCategory && matchesAccess && matchesQuery;
-    });
-  }, [query, selectedAccess, selectedCategory]);
+        return matchesCategory && matchesAccess && matchesQuery;
+      })
+      .sort((a, b) => b.id - a.id);
+  }, [courses, query, selectedAccess, selectedCategory]);
 
   return (
     <div className="space-y-5">
@@ -101,15 +113,23 @@ export default function CoursesBrowser() {
       </section>
 
       <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {filteredCourses.map((course) => (
-          <article
-            key={course.title}
-            className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
-          >
+        {isLoading ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-8 text-sm font-semibold text-slate-500 shadow-sm">
+            Loading courses...
+          </div>
+        ) : null}
+        {filteredCourses.map((course) => {
+          const isLocked = course.access === "Paid" && !hasMembership;
+
+          return (
+            <article
+              key={course.title}
+              className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
+            >
             <div className="relative h-44 overflow-hidden">
               <div
-                className="h-full bg-cover bg-center transition duration-500 group-hover:scale-105"
-                style={{ backgroundImage: `url(${course.image})` }}
+                className={`h-full bg-cover bg-center transition duration-500 group-hover:scale-105 ${isLocked ? "grayscale" : ""}`}
+                style={{ backgroundImage: `url(${mediaUrl(course.image) || course.image})` }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
               <span className="absolute left-3 top-3 rounded-md bg-white/95 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm">
@@ -118,6 +138,11 @@ export default function CoursesBrowser() {
               <span className={`absolute right-3 top-3 rounded-md px-2.5 py-1 text-xs font-bold shadow-sm ${course.access === "Free" ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"}`}>
                 {course.access}
               </span>
+              {isLocked ? (
+                <span className="absolute bottom-3 left-3 rounded-md bg-slate-950/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                  Membership required
+                </span>
+              ) : null}
             </div>
             <div className="flex flex-1 flex-col p-4">
               <h2 className="line-clamp-2 min-h-10 overflow-hidden text-base font-bold leading-tight text-slate-950">{course.title}</h2>
@@ -137,18 +162,29 @@ export default function CoursesBrowser() {
                 <span>{course.duration}</span>
               </div>
 
-              <Link
-                href={`/user/courses/${course.slug}`}
-                className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
-              >
-                Enroll Now
-              </Link>
+              {isLocked ? (
+                <button
+                  className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
+                  type="button"
+                  onClick={() => showToast("Membership required to access paid courses.", "info")}
+                >
+                  Enroll Now
+                </button>
+              ) : (
+                <Link
+                  href={`/user/courses/${course.slug}`}
+                  className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
+                >
+                  Enroll Now
+                </Link>
+              )}
             </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </section>
 
-      {filteredCourses.length === 0 ? (
+      {!isLoading && filteredCourses.length === 0 ? (
         <section className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <p className="text-sm font-semibold text-slate-600">No courses found.</p>
         </section>

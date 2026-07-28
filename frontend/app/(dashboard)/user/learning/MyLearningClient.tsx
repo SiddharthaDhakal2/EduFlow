@@ -1,57 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { courses, type Course } from "../../../lib/courseCatalog";
-import { readCompletedLessons } from "../../../lib/courseProgress";
+import { useEffect, useState } from "react";
+import { apiFetch, mediaUrl, type Certificate, type Course } from "../../../lib/api";
 
-const enrolledCourseSlugs = [
-  "complete-web-development-bootcamp-2026",
-  "python-for-data-science-machine-learning",
-  "java-programming-masterclass",
-];
+type LearningCourse = Course & {
+  completedLessons: number;
+  totalLessons: number;
+  progress: number;
+  lastActivity: string;
+  certificate: Certificate | null;
+};
 
 export default function MyLearningClient() {
-  const [completedByCourse, setCompletedByCourse] = useState<Record<string, number>>({});
-
-  const learningCourses = useMemo(
-    () =>
-      enrolledCourseSlugs
-        .map((slug) => courses.find((course) => course.slug === slug))
-        .filter((course): course is Course => Boolean(course))
-        .map((course) => {
-          const completedLessons = completedByCourse[course.slug] ?? 0;
-          const totalLessons = course.lessonItems.length;
-          const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-
-          return {
-            ...course,
-            completedLessons,
-            totalLessons,
-            progress,
-            status: progress === 100 ? "Completed" : "In Progress",
-            lastActivity: completedLessons > 0 ? "Recently" : "Not started",
-          };
-        }),
-    [completedByCourse],
-  );
+  const [learningCourses, setLearningCourses] = useState<LearningCourse[]>([]);
 
   useEffect(() => {
     function refreshProgress() {
-      setCompletedByCourse(
-        Object.fromEntries(
-          enrolledCourseSlugs.map((slug) => [slug, readCompletedLessons(slug).length]),
-        ),
-      );
+      apiFetch<{ courses: LearningCourse[] }>("/learning").then((data) => setLearningCourses(data.courses));
     }
 
     refreshProgress();
     window.addEventListener("course-progress-updated", refreshProgress);
-    window.addEventListener("storage", refreshProgress);
 
     return () => {
       window.removeEventListener("course-progress-updated", refreshProgress);
-      window.removeEventListener("storage", refreshProgress);
     };
   }, []);
 
@@ -67,9 +40,10 @@ export default function MyLearningClient() {
         </p>
       </section>
 
-      <section className="grid gap-3 md:grid-cols-2">
+      <section className="grid gap-3 md:grid-cols-3">
         <SummaryCard label="Enrolled Courses" value={learningCourses.length.toString()} tone="blue" icon="book" />
         <SummaryCard label="In Progress" value={inProgressCount.toString()} tone="amber" icon="clock" />
+        <SummaryCard label="Certificates" value={completedCount.toString()} tone="emerald" icon="certificate" />
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -86,7 +60,7 @@ export default function MyLearningClient() {
             >
               <div
                 className="min-h-40 bg-cover bg-center lg:min-h-full"
-                style={{ backgroundImage: `url(${course.image})` }}
+                style={{ backgroundImage: `url(${mediaUrl(course.image) || course.image})` }}
               />
               <div className="p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -95,8 +69,8 @@ export default function MyLearningClient() {
                       <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
                         {course.category}
                       </span>
-                      <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${course.status === "Completed" ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"}`}>
-                        {course.status}
+                      <span className={`rounded-md px-2.5 py-1 text-xs font-bold ${course.progress === 100 ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"}`}>
+                        {course.progress === 100 ? "Completed" : "In Progress"}
                       </span>
                     </div>
                     <h3 className="mt-3 text-base font-bold text-slate-950">{course.title}</h3>
@@ -123,14 +97,24 @@ export default function MyLearningClient() {
 
                 <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <span className="text-xs text-slate-500">
-                    {course.status === "Completed" ? "Course completed" : "Next lesson is ready"}
+                    {course.progress === 100 ? "Course completed" : "Next lesson is ready"}
                   </span>
-                  <Link
-                    href={`/user/courses/${course.slug}`}
-                    className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
-                  >
-                    {course.status === "Completed" ? "Review Course" : "Continue"}
-                  </Link>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    {course.progress === 100 ? (
+                      <Link
+                        href={`/user/certificates/${course.slug}`}
+                        className="inline-flex h-10 items-center justify-center rounded-lg bg-emerald-600 px-4 text-sm font-bold text-white transition hover:bg-emerald-700"
+                      >
+                        View Certificate
+                      </Link>
+                    ) : null}
+                    <Link
+                      href={`/user/courses/${course.slug}`}
+                      className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
+                    >
+                      {course.progress === 100 ? "Review Course" : "Continue"}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </article>
@@ -161,6 +145,7 @@ function toneClass(tone: string) {
   const tones: Record<string, string> = {
     blue: "bg-blue-50 text-blue-600",
     amber: "bg-orange-50 text-orange-600",
+    emerald: "bg-emerald-50 text-emerald-600",
   };
   return tones[tone] ?? tones.blue;
 }
@@ -170,6 +155,15 @@ function StatIcon({ name }: { name: string }) {
     return (
       <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
         <path d="M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      </svg>
+    );
+  }
+
+  if (name === "certificate") {
+    return (
+      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+        <path d="M7 4h10a2 2 0 0 1 2 2v14l-4-2-3 2-3-2-4 2V6a2 2 0 0 1 2-2Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+        <path d="M9 8h6M9 12h6" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
       </svg>
     );
   }

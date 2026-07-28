@@ -1,57 +1,34 @@
+"use client";
+
 import Link from "next/link";
-
-const stats = [
-  {
-    title: "Total Enrolled Courses",
-    value: "0",
-    detail: "Active courses",
-    color: "text-blue-600",
-    icon: "book",
-  },
-  {
-    title: "Completed",
-    value: "0",
-    detail: "Courses finished",
-    color: "text-emerald-600",
-    icon: "check",
-  },
-  {
-    title: "In Progress",
-    value: "0",
-    detail: "Ongoing courses",
-    color: "text-orange-600",
-    icon: "clock",
-  },
-];
-
-const recentCourses = [
-  {
-    title: "Advanced JavaScript & TypeScript",
-    category: "Web Development",
-    instructor: "Alex Martinez",
-    image:
-      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    title: "Flutter App Development",
-    category: "App Development",
-    instructor: "Lisa Park",
-    image:
-      "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=900&q=80",
-  },
-];
-
-const membership = {
-  active: true,
-  expiresOn: "2027-01-15",
-};
+import { useEffect, useState } from "react";
+import { apiFetch, mediaUrl, type Course, type User } from "../../../lib/api";
 
 export default function DashboardPage() {
+  const [dashboard, setDashboard] = useState<{
+    user: User;
+    stats: { total: number; completed: number; inProgress: number };
+    membership: { active?: boolean; expiryDate?: string };
+    recentCourses: Course[];
+  } | null>(null);
+
+  useEffect(() => {
+    apiFetch<NonNullable<typeof dashboard>>("/user/dashboard").then(setDashboard);
+  }, []);
+
+  const stats = [
+    { title: "Total Enrolled Courses", value: dashboard?.stats.total.toString() || "0", detail: "Active courses", color: "text-blue-600", icon: "book" },
+    { title: "Completed", value: dashboard?.stats.completed.toString() || "0", detail: "Courses finished", color: "text-emerald-600", icon: "check" },
+    { title: "In Progress", value: dashboard?.stats.inProgress.toString() || "0", detail: "Ongoing courses", color: "text-orange-600", icon: "clock" },
+  ];
+  const membership = dashboard?.membership || { active: false };
+  const recentCourses = dashboard?.recentCourses || [];
+
   return (
     <div className="space-y-6">
       <section>
         <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">
-          Welcome, Siddhartha!
+          Welcome, {dashboard?.user.name || "Learner"}!
         </h1>
         <p className="mt-1 text-sm text-slate-500">
           Continue your learning journey
@@ -79,7 +56,7 @@ export default function DashboardPage() {
               </span>
               {membership.active ? (
                 <span className="text-xs font-semibold text-slate-600">
-                  Expires on {membership.expiresOn}
+                  Expires on {membership.expiryDate}
                 </span>
               ) : null}
             </div>
@@ -140,7 +117,7 @@ export default function DashboardPage() {
             >
               <div
                 className="h-36 bg-cover bg-center"
-                style={{ backgroundImage: `url(${course.image})` }}
+                style={{ backgroundImage: `url(${mediaUrl(course.image) || course.image})` }}
               />
               <div className="p-5">
                 <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-700">

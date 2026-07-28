@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { readCompletedLessons } from "../../../../lib/courseProgress";
+import { fetchCompletedLessons, readCompletedLessons } from "../../../../lib/courseProgress";
 
 export default function CourseProgressCircle({ courseSlug, totalLessons }: { courseSlug: string; totalLessons: number }) {
   const [completedCount, setCompletedCount] = useState(0);
 
   useEffect(() => {
-    function updateProgress() {
-      setCompletedCount(readCompletedLessons(courseSlug).length);
+    async function updateProgress() {
+      try {
+        const completedLessons = await fetchCompletedLessons(courseSlug);
+        setCompletedCount(completedLessons.length);
+      } catch {
+        setCompletedCount(readCompletedLessons(courseSlug).length);
+      }
     }
 
     updateProgress();

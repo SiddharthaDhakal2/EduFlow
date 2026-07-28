@@ -1,34 +1,26 @@
-const pinnedAnnouncements = [
-  {
-    title: "New Course: Flutter App Development",
-    date: "2026-05-15",
-    body: "We are excited to announce a new course on Flutter App Development. Learn to build beautiful cross-platform mobile apps!",
-  },
-  {
-    title: "Summer Sale: 20% Off All Memberships",
-    date: "2026-05-05",
-    body: "Get 20% off on yearly memberships this summer! Offer valid until June 30, 2026. Use code SUMMER2026 at checkout.",
-  },
-];
+"use client";
 
-const announcements = [
-  {
-    title: "Platform Maintenance Scheduled",
-    date: "2026-05-10",
-    body: "EduFlow will undergo scheduled maintenance on May 25, 2026, from 2 AM to 4 AM. The platform will be temporarily unavailable during this time.",
-  },
-  {
-    title: "New Features: Progress Tracking",
-    date: "2026-04-28",
-    body: "We have added a new progress tracking feature. You can now see your course completion percentage and track your learning journey.",
-  },
-];
+import { useEffect, useState } from "react";
+import { apiFetch } from "../../../lib/api";
 
-export const metadata = {
-  title: "Announcements - EduFlow",
+type Announcement = {
+  id: number;
+  title: string;
+  date: string;
+  message: string;
+  pinned: boolean;
 };
 
 export default function AnnouncementsPage() {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  useEffect(() => {
+    apiFetch<{ announcements: Announcement[] }>("/announcements").then((data) => setAnnouncements(data.announcements));
+  }, []);
+
+  const pinnedAnnouncements = announcements.filter((announcement) => announcement.pinned);
+  const regularAnnouncements = announcements.filter((announcement) => !announcement.pinned);
+
   return (
     <div className="max-w-5xl space-y-5">
       <section>
@@ -57,7 +49,7 @@ export default function AnnouncementsPage() {
         <h2 className="mb-3 text-sm font-bold text-slate-950">All Announcements</h2>
 
         <div className="space-y-3">
-          {announcements.map((announcement) => (
+          {regularAnnouncements.map((announcement) => (
             <AnnouncementCard
               key={announcement.title}
               announcement={announcement}
@@ -76,7 +68,7 @@ function AnnouncementCard({
   announcement: {
     title: string;
     date: string;
-    body: string;
+    message: string;
   };
   pinned?: boolean;
 }) {
@@ -103,7 +95,7 @@ function AnnouncementCard({
         <time dateTime={announcement.date}>{announcement.date}</time>
       </div>
 
-      <p className="mt-5 text-sm leading-6 text-slate-600">{announcement.body}</p>
+      <p className="mt-5 text-sm leading-6 text-slate-600">{announcement.message}</p>
     </article>
   );
 }

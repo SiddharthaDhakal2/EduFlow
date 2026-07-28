@@ -1,22 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { markLessonComplete, readCompletedLessons } from "../../../../../../lib/courseProgress";
+import { fetchCompletedLessons, markLessonComplete, readCompletedLessons } from "../../../../../../lib/courseProgress";
+import { showToast } from "../../../../../../lib/toast";
 
 export default function MarkAsReadButton({ courseSlug, lessonIndex }: { courseSlug: string; lessonIndex: number }) {
   const [isRead, setIsRead] = useState(false);
 
   useEffect(() => {
-    function updateReadState() {
-      setIsRead(readCompletedLessons(courseSlug).includes(lessonIndex));
+    async function updateReadState() {
+      try {
+        const completedLessons = await fetchCompletedLessons(courseSlug);
+        setIsRead(completedLessons.includes(lessonIndex));
+      } catch {
+        setIsRead(readCompletedLessons(courseSlug).includes(lessonIndex));
+      }
     }
 
     updateReadState();
   }, [courseSlug, lessonIndex]);
 
-  function handleMarkAsRead() {
-    markLessonComplete(courseSlug, lessonIndex);
+  async function handleMarkAsRead() {
+    const progress = await markLessonComplete(courseSlug, lessonIndex);
     setIsRead(true);
+    showToast(progress.certificate ? "Course completed. Certificate unlocked." : "Lesson marked as read.");
   }
 
   return (
