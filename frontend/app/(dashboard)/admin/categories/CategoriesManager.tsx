@@ -1,19 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { defaultCourseCategories, readSavedCourseCategories, saveCourseCategories } from "../../../lib/courseCategories";
-
-const postedCourseCounts: Record<string, number> = {
-  "Web Development": 2,
-  "App Development": 1,
-  "Data Science": 1,
-  Programming: 1,
-  Business: 0,
-  Python: 0,
-};
+import { createCourseCategory, defaultCourseCategories, deleteCourseCategory, fetchCourseCategories, updateCourseCategory } from "../../../lib/courseCategories";
+import { showToast } from "../../../lib/toast";
 
 export default function CategoriesManager() {
   const [categories, setCategories] = useState<string[]>(defaultCourseCategories);
+  const [postedCourseCounts, setPostedCourseCounts] = useState<Record<string, number>>({});
   const [categoryName, setCategoryName] = useState("");
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
@@ -26,12 +19,16 @@ export default function CategoriesManager() {
   );
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setCategories(readSavedCourseCategories());
-    }, 0);
+    const timeoutId = window.setTimeout(loadCategories, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, []);
+
+  async function loadCategories() {
+    const data = await fetchCourseCategories();
+    setCategories(data.categories);
+    setPostedCourseCounts(data.counts);
+  }
 
   function resetForm() {
     setCategoryName("");
@@ -39,7 +36,7 @@ export default function CategoriesManager() {
     setError("");
   }
 
-  function saveCategory(event: FormEvent<HTMLFormElement>) {
+  async function saveCategory(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const nextCategory = categoryName.trim();
@@ -56,14 +53,14 @@ export default function CategoriesManager() {
       return;
     }
 
-    const nextCategories = editingCategory
-      ? categories.map((category) => (category === editingCategory ? nextCategory : category))
-      : [...categories, nextCategory];
-
-    const sortedCategories = nextCategories.sort((a, b) => a.localeCompare(b));
+    const sortedCategories = editingCategory
+      ? await updateCourseCategory(editingCategory, nextCategory)
+      : await createCourseCategory(nextCategory);
     setCategories(sortedCategories);
-    saveCourseCategories(sortedCategories);
-    setNotice(editingCategory ? `${nextCategory} updated.` : `${nextCategory} added.`);
+    await loadCategories();
+    const message = editingCategory ? `${nextCategory} updated.` : `${nextCategory} added.`;
+    setNotice(message);
+    showToast(message);
     resetForm();
   }
 
@@ -74,18 +71,24 @@ export default function CategoriesManager() {
     setNotice("");
   }
 
-  function confirmDeleteCategory() {
+  async function confirmDeleteCategory() {
     if (!categoryToDelete) return;
 
-    const nextCategories = categories.filter((category) => category !== categoryToDelete);
+    const nextCategories = await deleteCourseCategory(categoryToDelete);
     setCategories(nextCategories);
-    saveCourseCategories(nextCategories);
-    setNotice(`${categoryToDelete} deleted.`);
+    await loadCategories();
+    const message = `${categoryToDelete} deleted.`;
+    setNotice(message);
+    showToast(message);
     setCategoryToDelete(null);
 
     if (editingCategory === categoryToDelete) {
       resetForm();
     }
+  }
+
+  function getPostedCount(category: string) {
+    return postedCourseCounts[category] ?? 0;
   }
 
   return (
@@ -211,10 +214,6 @@ export default function CategoriesManager() {
       )}
     </div>
   );
-}
-
-function getPostedCount(category: string) {
-  return postedCourseCounts[category] ?? 0;
 }
 
 function SummaryCard({ label, value }: { label: string; value: string }) {

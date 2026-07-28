@@ -3,89 +3,31 @@
 import Link from "next/link";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { defaultCourseCategories, readSavedCourseCategories } from "../../../lib/courseCategories";
+import { apiFetch, mediaUrl } from "../../../lib/api";
+import { defaultCourseCategories, fetchCourseCategories } from "../../../lib/courseCategories";
+import { showToast } from "../../../lib/toast";
 
 type CourseStatus = "Published" | "Draft";
 
 type Course = {
   id: number;
+  slug: string;
   title: string;
   category: string;
   instructor: string;
+  difficulty: string;
   lessons: number;
   students: number;
   created: string;
   updated: string;
   status: CourseStatus;
+  image?: string;
   accent: string;
 };
 
-const initialCourses: Course[] = [
-  {
-    id: 1,
-    title: "Complete Web Development Bootcamp 2026",
-    category: "Web Development",
-    instructor: "Sarah Johnson",
-    lessons: 48,
-    students: 1326,
-    created: "Jan 12, 2026",
-    updated: "Jul 22, 2026",
-    status: "Published",
-    accent: "from-blue-600 to-cyan-500",
-  },
-  {
-    id: 2,
-    title: "React Native - Build Mobile Apps",
-    category: "App Development",
-    instructor: "Michael Chen",
-    lessons: 36,
-    students: 914,
-    created: "Feb 04, 2026",
-    updated: "Jul 18, 2026",
-    status: "Published",
-    accent: "from-slate-800 to-blue-500",
-  },
-  {
-    id: 3,
-    title: "Python for Data Science & Machine Learning",
-    category: "Data Science",
-    instructor: "Dr. Emily Watson",
-    lessons: 42,
-    students: 1189,
-    created: "Mar 09, 2026",
-    updated: "Jul 14, 2026",
-    status: "Draft",
-    accent: "from-emerald-600 to-teal-500",
-  },
-  {
-    id: 4,
-    title: "Advanced TypeScript Patterns",
-    category: "Web Development",
-    instructor: "Alex Martinez",
-    lessons: 18,
-    students: 0,
-    created: "Jun 18, 2026",
-    updated: "Jul 08, 2026",
-    status: "Draft",
-    accent: "from-violet-600 to-fuchsia-500",
-  },
-  {
-    id: 5,
-    title: "Java Programming Masterclass",
-    category: "Programming",
-    instructor: "David Kumar",
-    lessons: 31,
-    students: 683,
-    created: "Apr 16, 2026",
-    updated: "Jun 30, 2026",
-    status: "Draft",
-    accent: "from-orange-600 to-red-500",
-  },
-];
-
 const statuses = ["All statuses", "Published", "Draft"];
 export default function CoursesManager() {
-  const [courses, setCourses] = useState(initialCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [categoryOptions, setCategoryOptions] = useState(["All categories", ...defaultCourseCategories]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All categories");
@@ -94,8 +36,9 @@ export default function CoursesManager() {
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    function syncCategories() {
-      const nextCategories = ["All categories", ...readSavedCourseCategories()];
+    async function syncCategories() {
+      const data = await fetchCourseCategories().catch(() => ({ categories: defaultCourseCategories }));
+      const nextCategories = ["All categories", ...data.categories];
       setCategoryOptions(nextCategories);
       setCategory((current) => (nextCategories.includes(current) ? current : "All categories"));
     }
@@ -108,6 +51,12 @@ export default function CoursesManager() {
       window.removeEventListener("storage", syncCategories);
       window.removeEventListener("course-categories-updated", syncCategories);
     };
+  }, []);
+
+  useEffect(() => {
+    apiFetch<{ courses: Course[] }>("/courses?includeDrafts=true").then((data) => {
+      setCourses(data.courses.map((course, index) => ({ ...course, accent: accentForIndex(index), created: course.created || "", updated: course.updated || "" })));
+    });
   }, []);
 
   const visibleCourses = useMemo(() => {
@@ -137,8 +86,6 @@ export default function CoursesManager() {
       setCourseToDelete(course);
       return;
     }
-
-    setNotice(`${action} selected for ${course.title}.`);
   }
 
   return (
@@ -206,10 +153,11 @@ export default function CoursesManager() {
           </div>
         ) : (
           <>
-            <div className="hidden grid-cols-[2.2fr_0.9fr_1fr_0.7fr_0.8fr_0.8fr_70px] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-bold text-slate-500 xl:grid">
+            <div className="hidden grid-cols-[2.2fr_0.85fr_0.95fr_0.85fr_0.6fr_0.7fr_0.75fr_76px] gap-4 border-b border-slate-200 bg-blue-50/50 px-5 py-3 text-xs font-bold uppercase text-slate-500 xl:grid">
               <span>Course</span>
               <span>Category</span>
               <span>Instructor</span>
+              <span>Level</span>
               <span>Lessons</span>
               <span>Enrolled</span>
               <span>Status</span>
@@ -219,14 +167,12 @@ export default function CoursesManager() {
               {visibleCourses.map((course) => (
                 <article
                   key={course.id}
-                  className="grid gap-4 px-5 py-4 text-sm xl:grid-cols-[2.2fr_0.9fr_1fr_0.7fr_0.8fr_0.8fr_70px]"
+                  className="grid gap-4 px-5 py-4 text-sm transition hover:bg-blue-50/30 xl:grid-cols-[2.2fr_0.85fr_0.95fr_0.85fr_0.6fr_0.7fr_0.75fr_76px] xl:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-16 w-24 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${course.accent} text-white`}>
-                      <CourseIcon />
-                    </div>
+                    <CourseThumbnail course={course} />
                     <div className="min-w-0">
-                      <h2 className="truncate font-bold text-slate-950">{course.title}</h2>
+                      <h2 className="line-clamp-2 font-bold leading-5 text-slate-950">{course.title}</h2>
                       <p className="mt-1 text-xs text-slate-500 xl:hidden">
                         {course.category} / {course.instructor}
                       </p>
@@ -234,6 +180,12 @@ export default function CoursesManager() {
                   </div>
                   <TableCell label="Category">{course.category}</TableCell>
                   <TableCell label="Instructor">{course.instructor}</TableCell>
+                  <div className="flex items-center justify-between xl:block">
+                    <span className="text-xs font-bold text-slate-400 xl:hidden">Level</span>
+                    <span className={`rounded-md px-2 py-1 text-xs font-bold ${difficultyClass(course.difficulty)}`}>
+                      {course.difficulty}
+                    </span>
+                  </div>
                   <TableCell label="Lessons">{course.lessons}</TableCell>
                   <TableCell label="Enrolled">{course.students.toLocaleString()}</TableCell>
                   <div className="flex items-center justify-between xl:block">
@@ -243,14 +195,13 @@ export default function CoursesManager() {
                     </span>
                   </div>
                   <div className="flex items-center justify-end gap-2">
-                    <button
+                    <Link
                       className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-200 hover:bg-blue-100"
-                      type="button"
                       aria-label={`Edit ${course.title}`}
-                      onClick={() => handleMenuAction("Edit Course", course)}
+                      href={`/admin/courses/new?edit=${encodeURIComponent(course.slug)}`}
                     >
                       <EditIcon />
-                    </button>
+                    </Link>
                     <button
                       className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-600 transition hover:border-red-200 hover:bg-red-100"
                       type="button"
@@ -274,13 +225,19 @@ export default function CoursesManager() {
               <div>
                 <h2 className="text-lg font-bold text-slate-950">Delete course?</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Are you sure you want to delete{" "}
-                  <span className="font-bold text-slate-950">{courseToDelete.title}</span>?
+                  This course will be removed from admin and user course lists.
                 </p>
               </div>
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
                 <TrashIcon />
               </span>
+            </div>
+            <div className="mt-4 flex items-center gap-3 rounded-lg border border-red-100 bg-red-50/60 p-3">
+              <CourseThumbnail course={courseToDelete} />
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase text-red-600">Confirm delete</p>
+                <h3 className="mt-1 line-clamp-2 text-sm font-bold text-slate-950">{courseToDelete.title}</h3>
+              </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <button
@@ -294,9 +251,18 @@ export default function CoursesManager() {
                 className="h-10 rounded-lg bg-red-600 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-red-700"
                 type="button"
                 onClick={() => {
-                  setCourses((current) => current.filter((course) => course.id !== courseToDelete.id));
-                  setNotice(`${courseToDelete.title} deleted.`);
-                  setCourseToDelete(null);
+                  apiFetch(`/courses/${courseToDelete.slug}`, { method: "DELETE" })
+                    .then(() => {
+                      setCourses((current) => current.filter((course) => course.id !== courseToDelete.id));
+                      const message = `${courseToDelete.title} deleted.`;
+                      setNotice(message);
+                      showToast(message);
+                      setCourseToDelete(null);
+                    })
+                    .catch((error) => {
+                      const message = error instanceof Error ? error.message : "Course delete failed.";
+                      setNotice(message);
+                    });
                 }}
               >
                 Delete Course
@@ -307,6 +273,28 @@ export default function CoursesManager() {
       )}
     </div>
   );
+}
+
+function CourseThumbnail({ course }: { course: Course }) {
+  return (
+    <div className={`flex h-18 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br ${course.accent} text-white ring-1 ring-blue-100`}>
+      {course.image ? (
+        <img alt={course.title} className="h-full w-full object-cover" src={mediaUrl(course.image)} />
+      ) : (
+        <CourseIcon />
+      )}
+    </div>
+  );
+}
+
+function accentForIndex(index: number) {
+  return [
+    "from-blue-600 to-cyan-500",
+    "from-slate-800 to-blue-500",
+    "from-emerald-600 to-teal-500",
+    "from-violet-600 to-fuchsia-500",
+    "from-orange-600 to-red-500",
+  ][index % 5];
 }
 
 function SummaryCard({ label, value, icon, tone }: { label: string; value: string; icon: string; tone: string }) {
@@ -354,6 +342,13 @@ function TableCell({ label, children }: { label: string; children: React.ReactNo
 function statusClass(status: CourseStatus) {
   if (status === "Published") return "bg-emerald-50 text-emerald-700";
   return "bg-orange-50 text-orange-700";
+}
+
+function difficultyClass(difficulty: string) {
+  if (difficulty === "Beginner") return "bg-sky-50 text-sky-700";
+  if (difficulty === "Intermediate") return "bg-violet-50 text-violet-700";
+  if (difficulty === "Advanced") return "bg-rose-50 text-rose-700";
+  return "bg-slate-100 text-slate-600";
 }
 
 function toneClass(tone: string) {

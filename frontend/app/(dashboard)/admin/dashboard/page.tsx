@@ -1,34 +1,39 @@
-const stats = [
-  { title: "Total Users", value: "1,248", icon: "users", tone: "blue" },
-  { title: "Active Members", value: "684", icon: "member", tone: "emerald" },
-  { title: "Free Users", value: "564", icon: "free", tone: "sky" },
-  { title: "Courses", value: "32", icon: "course", tone: "violet" },
-  { title: "Certificates", value: "512", icon: "certificate", tone: "amber" },
-  { title: "Revenue", value: "NPR 2.1M", icon: "revenue", tone: "rose" },
-];
+"use client";
 
-const growth = [
-  { month: "Aug", value: 410 },
-  { month: "Sep", value: 455 },
-  { month: "Oct", value: 500 },
-  { month: "Nov", value: 520 },
-  { month: "Dec", value: 545 },
-  { month: "Jan", value: 565 },
-];
-
-const payments = [
-  { user: "Ram Sharma", initials: "RS", transaction: "EDU-10234", method: "eSewa", amount: "NPR 2,999", status: "Successful", color: "bg-cyan-600" },
-  { user: "Sita Rai", initials: "SR", transaction: "EDU-10235", method: "Khalti", amount: "NPR 2,999", status: "Pending", color: "bg-red-600" },
-  { user: "Arjun Karki", initials: "AK", transaction: "EDU-10236", method: "Bank Transfer", amount: "NPR 2,999", status: "Successful", color: "bg-red-600" },
-  { user: "Mina Thapa", initials: "MT", transaction: "EDU-10237", method: "eSewa", amount: "NPR 1,499", status: "Successful", color: "bg-indigo-600" },
-  { user: "Nabin Gurung", initials: "NG", transaction: "EDU-10238", method: "Khalti", amount: "NPR 1,499", status: "Failed", color: "bg-slate-700" },
-].slice(0, 5);
-
-export const metadata = {
-  title: "Admin Dashboard - EduFlow",
-};
+import { useEffect, useState } from "react";
+import { apiFetch, mediaUrl } from "../../../lib/api";
 
 export default function AdminDashboardPage() {
+  const [dashboard, setDashboard] = useState<{
+    stats: { totalUsers: number; activeMembers: number; freeUsers: number; courses: number; certificates: number; revenue: number };
+    growth: { month: string; value: number }[];
+    certificatesIssued: { month: string; value: number }[];
+    payments: { id: string; user: string; method: string; amount: number; status: string; avatar?: string; profileImage?: string | null }[];
+  } | null>(null);
+
+  useEffect(() => {
+    apiFetch<NonNullable<typeof dashboard>>("/admin/dashboard").then(setDashboard);
+  }, []);
+
+  const stats = [
+    { title: "Total Users", value: (dashboard?.stats.totalUsers || 0).toString(), icon: "users", tone: "blue" },
+    { title: "Active Members", value: (dashboard?.stats.activeMembers || 0).toString(), icon: "member", tone: "emerald" },
+    { title: "Free Users", value: (dashboard?.stats.freeUsers || 0).toString(), icon: "free", tone: "sky" },
+    { title: "Courses", value: (dashboard?.stats.courses || 0).toString(), icon: "course", tone: "violet" },
+    { title: "Certificates", value: (dashboard?.stats.certificates || 0).toString(), icon: "certificate", tone: "amber" },
+    { title: "Revenue", value: `NPR ${(dashboard?.stats.revenue || 0).toLocaleString()}`, icon: "revenue", tone: "rose" },
+  ];
+  const certificatesIssued = dashboard?.certificatesIssued || [];
+  const chartMax = Math.max(...certificatesIssued.map((item) => item.value), 4);
+  const yAxisLabels = Array.from({ length: 5 }, (_, index) => Math.round(chartMax - (chartMax * index) / 4));
+  const thisMonthIssued = certificatesIssued.at(-1)?.value || 0;
+  const lastMonthIssued = certificatesIssued.at(-2)?.value || 0;
+  const issuedChange = thisMonthIssued - lastMonthIssued;
+  const payments = dashboard?.payments || [];
+  const activeUsers = dashboard?.stats.activeMembers || 0;
+  const inactiveUsers = dashboard ? Math.max(dashboard.stats.totalUsers - activeUsers, 0) : 0;
+  const activePercent = dashboard?.stats.totalUsers ? (activeUsers / dashboard.stats.totalUsers) * 100 : 0;
+
   return (
     <div className="space-y-5">
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -58,12 +63,15 @@ export default function AdminDashboardPage() {
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-bold text-slate-950">User Growth</h2>
+          <div>
+            <h2 className="text-base font-bold text-slate-950">Certificates Issued</h2>
+            <p className="mt-1 text-sm text-slate-500">Monthly completed-course certificates</p>
+          </div>
           <div className="mt-5 grid h-[205px] grid-cols-[48px_1fr] grid-rows-[1fr_auto]">
             <div className="relative row-start-1 text-sm font-medium text-slate-400">
-              {[800, 600, 400, 200, 0].map((label, index) => (
+              {yAxisLabels.map((label, index) => (
                 <span
-                  key={label}
+                  key={`${label}-${index}`}
                   className="absolute right-3 -translate-y-1/2"
                   style={{ top: `${index * 25}%` }}
                 >
@@ -73,30 +81,37 @@ export default function AdminDashboardPage() {
             </div>
             <div className="relative row-start-1 overflow-hidden border-l border-b border-dashed border-slate-100 bg-[linear-gradient(to_bottom,rgba(226,232,240,0.6)_1px,transparent_1px),linear-gradient(to_right,rgba(226,232,240,0.45)_1px,transparent_1px)] bg-[size:100%_25%,16.666%_100%] px-3">
               <div className="flex h-full items-end justify-between gap-5">
-                {growth.map((item) => (
+                {certificatesIssued.map((item) => (
                   <div key={item.month} className="flex h-full flex-1 items-end justify-center">
                     <div
-                      className="w-full max-w-12 rounded-t-[4px] bg-blue-600"
-                      style={{ height: `${(item.value / 800) * 100}%` }}
+                      className="w-full max-w-12 rounded-t-[4px] bg-emerald-600"
+                      style={{ height: `${(item.value / chartMax) * 100}%` }}
                     />
                   </div>
                 ))}
               </div>
             </div>
             <div className="col-start-2 row-start-2 flex justify-between px-3 pt-2 text-sm font-medium text-slate-400">
-              {growth.map((item) => (
+              {certificatesIssued.map((item) => (
                 <span key={item.month} className="flex-1 text-center">
                   {item.month}
                 </span>
               ))}
             </div>
           </div>
+          <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-semibold text-slate-600">This month: {thisMonthIssued} certificates</span>
+            <span className={`font-bold ${issuedChange >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+              {issuedChange >= 0 ? "+" : ""}
+              {issuedChange} from last month
+            </span>
+          </div>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-base font-bold text-slate-950">Users</h2>
           <div className="mt-6 flex justify-center">
-            <div className="h-32 w-32 rounded-full bg-[conic-gradient(#2563eb_0_86.9%,#e2e8f0_86.9%_100%)] p-6">
+            <div className="h-32 w-32 rounded-full p-6" style={{ background: `conic-gradient(#2563eb 0 ${activePercent}%, #e2e8f0 ${activePercent}% 100%)` }}>
               <div className="h-full w-full rounded-full bg-white" />
             </div>
           </div>
@@ -106,14 +121,14 @@ export default function AdminDashboardPage() {
                 <span className="h-2 w-2 rounded-full bg-blue-600" />
                 Active
               </span>
-              <span className="font-semibold text-slate-950">1,084</span>
+              <span className="font-semibold text-slate-950">{activeUsers}</span>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="flex items-center gap-2 text-slate-600">
                 <span className="h-2 w-2 rounded-full bg-slate-200" />
                 Inactive
               </span>
-              <span className="font-semibold text-slate-950">164</span>
+              <span className="font-semibold text-slate-950">{inactiveUsers}</span>
             </div>
           </div>
         </div>
@@ -139,31 +154,49 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {payments.map((payment) => (
-                <tr key={payment.transaction}>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white ${payment.color}`}>
-                        {payment.initials}
-                      </span>
-                      <span className="font-semibold text-slate-950">{payment.user}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-950">{payment.transaction}</td>
-                  <td className="px-4 py-3 text-slate-950">{payment.method}</td>
-                  <td className="px-4 py-3 font-bold text-slate-950">{payment.amount}</td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-md px-2 py-1 text-xs font-semibold ${statusTone(payment.status)}`}>
-                      {payment.status}
-                    </span>
+              {payments.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-8 text-center text-sm font-medium text-slate-500" colSpan={5}>
+                    No real payments yet.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <PaymentAvatar payment={payment} />
+                        <span className="font-semibold text-slate-950">{payment.user}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-950">{payment.id}</td>
+                    <td className="px-4 py-3 text-slate-950">{payment.method}</td>
+                    <td className="px-4 py-3 font-bold text-slate-950">NPR {payment.amount.toLocaleString()}</td>
+                    <td className="px-4 py-3">
+                      <span className={`rounded-md px-2 py-1 text-xs font-semibold ${statusTone(payment.status)}`}>
+                        {payment.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </section>
     </div>
+  );
+}
+
+function PaymentAvatar({ payment }: { payment: { user: string; avatar?: string; profileImage?: string | null } }) {
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-xs font-bold text-white">
+      {payment.profileImage ? (
+        <img alt={payment.user} className="h-full w-full object-cover" src={mediaUrl(payment.profileImage)} />
+      ) : (
+        payment.avatar || payment.user.split(" ").map((part) => part[0]).join("").slice(0, 2)
+      )}
+    </span>
   );
 }
 
@@ -181,7 +214,7 @@ function iconTone(tone: string) {
 }
 
 function statusTone(status: string) {
-  if (status === "Successful") {
+  if (status === "Successful" || status === "Paid") {
     return "bg-emerald-50 text-emerald-700";
   }
 

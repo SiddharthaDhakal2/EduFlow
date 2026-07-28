@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
-import { defaultCourseCategories, readSavedCourseCategories } from "../../../../lib/courseCategories";
+import { API_BASE_URL, getToken, mediaUrl, type Course as ApiCourse } from "../../../../lib/api";
+import { defaultCourseCategories, fetchCourseCategories, readSavedCourseCategories } from "../../../../lib/courseCategories";
+import { showToast } from "../../../../lib/toast";
 
 type UploadFile = {
   name: string;
   preview?: string;
+  file?: File;
+  existingUrl?: string;
 };
 
 type Lesson = {
@@ -20,6 +25,9 @@ type Lesson = {
 const steps = ["Course Details", "Lessons", "Settings", "Summary"];
 
 export default function NewCourseBuilder() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editingSlug = searchParams.get("edit");
   const [step, setStep] = useState(0);
   const [notice, setNotice] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -40,8 +48,64 @@ export default function NewCourseBuilder() {
   ]);
 
   useEffect(() => {
-    function syncCategories() {
-      const nextCategories = readSavedCourseCategories();
+    if (!editingSlug) return;
+
+    async function loadCourseForEdit() {
+      const response = await fetch(`${API_BASE_URL}/courses/${editingSlug}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = data.message || "Unable to load course.";
+        setNotice(message);
+        return;
+      }
+
+      const loadedCourse = data.course as ApiCourse;
+      setCourse({
+        title: loadedCourse.title,
+        description: loadedCourse.description,
+        category: loadedCourse.category,
+        difficulty: loadedCourse.difficulty,
+        duration: loadedCourse.duration,
+        instructor: loadedCourse.instructor,
+        priceType: loadedCourse.access,
+        status: loadedCourse.status || "Draft",
+        thumbnail: loadedCourse.image
+          ? {
+              name: "Current thumbnail",
+              preview: mediaUrl(loadedCourse.image),
+              existingUrl: loadedCourse.image,
+            }
+          : null,
+      });
+      setLessons(
+        loadedCourse.lessonItems.length
+          ? loadedCourse.lessonItems.map((lesson, index) => ({
+              id: index + 1,
+              type: lesson.type,
+              title: lesson.title,
+              textContent: lesson.textContent || "",
+              videoFile: lesson.videoUrl
+                ? {
+                    name: lesson.videoTitle || "Current video",
+                    existingUrl: lesson.videoUrl,
+                  }
+                : null,
+            }))
+          : [{ id: 1, type: "Text", title: "", textContent: "", videoFile: null }],
+      );
+    }
+
+    loadCourseForEdit();
+  }, [editingSlug]);
+
+  useEffect(() => {
+    async function syncCategories() {
+      const nextCategories = (await fetchCourseCategories().catch(() => ({ categories: readSavedCourseCategories() }))).categories;
       setCategoryOptions(nextCategories);
       setCourse((current) => ({
         ...current,
@@ -71,6 +135,7 @@ export default function NewCourseBuilder() {
     updateCourse("thumbnail", {
       name: file.name,
       preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+      file,
     });
   }
 
@@ -86,11 +151,63 @@ export default function NewCourseBuilder() {
     return Object.keys(nextErrors).length === 0;
   }
 
-  function saveCourse(action: "draft" | "publish") {
+  async function saveCourse(action: "draft" | "publish" | "update") {
     if (!validate()) return;
 
-    setCourse((current) => ({ ...current, status: action === "publish" ? "Published" : "Draft" }));
-    setNotice(action === "publish" ? "Course is ready to publish." : "Course draft saved.");
+    const status = action === "publish" ? "Published" : course.status;
+    const formData = new FormData();
+    const lessonItems = lessons.map((lesson) => ({
+      title: lesson.title || "Untitled lesson",
+      type: lesson.type,
+      textContent: lesson.textContent,
+      videoTitle: lesson.videoFile?.name,
+      videoUrl: lesson.videoFile?.existingUrl,
+      videoFileIndex: undefined as number | undefined,
+    }));
+
+    if (course.thumbnail?.file) {
+      formData.append("thumbnail", course.thumbnail.file);
+    }
+
+    lessons.forEach((lesson, index) => {
+      if (lesson.videoFile?.file) {
+        lessonItems[index].videoFileIndex = Number(formData.getAll("lessonVideos").length);
+        formData.append("lessonVideos", lesson.videoFile.file);
+      }
+    });
+
+    formData.append("title", course.title);
+    formData.append("description", course.description);
+    formData.append("category", course.category);
+    formData.append("difficulty", course.difficulty);
+    formData.append("duration", course.duration);
+    formData.append("instructor", course.instructor);
+    formData.append("access", course.priceType);
+    formData.append("status", status);
+    formData.append("lessonItems", JSON.stringify(lessonItems));
+
+    const response = await fetch(editingSlug ? `${API_BASE_URL}/courses/${editingSlug}` : `${API_BASE_URL}/courses`, {
+      method: editingSlug ? "PUT" : "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      const message = data.message || "Unable to save course.";
+      setNotice(message);
+      return;
+    }
+
+    setCourse((current) => ({ ...current, status }));
+    const message = editingSlug ? "Course updated." : action === "publish" ? "Course published." : "Course draft saved.";
+    setNotice(message);
+    showToast(message);
+    if (editingSlug || action === "publish") {
+      router.push("/admin/courses");
+    }
   }
 
   function goNext() {
@@ -104,6 +221,7 @@ export default function NewCourseBuilder() {
 
   function addLesson() {
     setLessons((current) => [...current, { id: Date.now(), type: "Text", title: "", textContent: "", videoFile: null }]);
+    showToast("Lesson added.", "info");
   }
 
   function updateLesson(lessonId: number, key: keyof Lesson, value: string | UploadFile | null) {
@@ -112,6 +230,7 @@ export default function NewCourseBuilder() {
 
   function removeLesson(lessonId: number) {
     setLessons((current) => current.filter((lesson) => lesson.id !== lessonId));
+    showToast("Lesson removed.", "info");
   }
 
   function handleLessonVideo(lessonId: number, event: ChangeEvent<HTMLInputElement>) {
@@ -121,6 +240,7 @@ export default function NewCourseBuilder() {
     updateLesson(lessonId, "videoFile", {
       name: file.name,
       preview: file.type.startsWith("video/") ? URL.createObjectURL(file) : undefined,
+      file,
     });
   }
 
@@ -137,8 +257,8 @@ export default function NewCourseBuilder() {
           <Link className="text-sm font-bold text-blue-600 hover:text-blue-700" href="/admin/courses">
             Back to courses
           </Link>
-          <h1 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-slate-950">Add Course</h1>
-          <p className="mt-1 text-sm text-slate-500">Add only the details needed to create a course.</p>
+          <h1 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-slate-950">{editingSlug ? "Edit Course" : "Add Course"}</h1>
+          <p className="mt-1 text-sm text-slate-500">{editingSlug ? "Update course details, lessons, media, and publishing settings." : "Add only the details needed to create a course."}</p>
         </div>
       </section>
 
@@ -273,12 +393,20 @@ export default function NewCourseBuilder() {
               <Link className="h-10 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700" href="/admin/courses">
                 Cancel
               </Link>
-              <button className="h-10 rounded-lg border border-blue-200 bg-blue-50 px-4 text-sm font-bold text-blue-700" type="button" onClick={() => saveCourse("draft")}>
-                Save Draft
-              </button>
-              <button className="h-10 rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700" type="button" onClick={() => saveCourse("publish")}>
-                Publish Course
-              </button>
+              {editingSlug ? (
+                <button className="h-10 rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700" type="button" onClick={() => saveCourse("update")}>
+                  Update Course
+                </button>
+              ) : (
+                <>
+                  <button className="h-10 rounded-lg border border-blue-200 bg-blue-50 px-4 text-sm font-bold text-blue-700" type="button" onClick={() => saveCourse("draft")}>
+                    Save Draft
+                  </button>
+                  <button className="h-10 rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700" type="button" onClick={() => saveCourse("publish")}>
+                    Publish Course
+                  </button>
+                </>
+              )}
             </div>
           </FormCard>
         )}

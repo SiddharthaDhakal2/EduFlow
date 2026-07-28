@@ -1,6 +1,9 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { useEffect } from "react";
+import { apiFetch } from "../../../lib/api";
+import { showToast } from "../../../lib/toast";
 
 type AnnouncementStatus = "Published" | "Draft";
 
@@ -14,49 +17,10 @@ type Announcement = {
   message: string;
 };
 
-const initialAnnouncements: Announcement[] = [
-  {
-    id: 1,
-    title: "New Course: Flutter App Development",
-    audience: "All learners",
-    date: "Jul 20, 2026",
-    status: "Published",
-    pinned: true,
-    message: "Flutter App Development is now available for learners.",
-  },
-  {
-    id: 2,
-    title: "Platform Maintenance Scheduled",
-    audience: "All users",
-    date: "Jul 18, 2026",
-    status: "Published",
-    pinned: false,
-    message: "EduFlow will be unavailable for scheduled maintenance from 2 AM to 4 AM.",
-  },
-  {
-    id: 3,
-    title: "Python Course Update",
-    audience: "Python learners",
-    date: "Jul 14, 2026",
-    status: "Published",
-    pinned: true,
-    message: "New notebooks and practice lessons were added to the Python course.",
-  },
-  {
-    id: 4,
-    title: "Instructor Webinar Draft",
-    audience: "Paid learners",
-    date: "Jul 10, 2026",
-    status: "Draft",
-    pinned: false,
-    message: "Live instructor webinar announcement draft.",
-  },
-];
-
 const statuses = ["All statuses", "Published", "Draft"];
 
 export default function AnnouncementsManager() {
-  const [announcements, setAnnouncements] = useState(initialAnnouncements);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState(statuses[0]);
   const [announcementToDelete, setAnnouncementToDelete] = useState<Announcement | null>(null);
@@ -89,44 +53,44 @@ export default function AnnouncementsManager() {
   const draftCount = announcements.filter((announcement) => announcement.status === "Draft").length;
   const pinnedCount = announcements.filter((announcement) => announcement.pinned).length;
 
-  function createAnnouncement(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    loadAnnouncements();
+  }, []);
+
+  async function loadAnnouncements() {
+    const data = await apiFetch<{ announcements: Announcement[] }>("/announcements?includeDrafts=true");
+    setAnnouncements(data.announcements);
+  }
+
+  async function createAnnouncement(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!form.title.trim() || !form.message.trim()) return;
+    if (!form.title.trim() || !form.message.trim()) {
+      return;
+    }
 
     if (editingAnnouncementId) {
-      setAnnouncements((current) =>
-        current.map((announcement) =>
-          announcement.id === editingAnnouncementId
-            ? {
-                ...announcement,
-                title: form.title.trim(),
-                audience: form.audience,
-                status: form.status,
-                pinned: form.pinned,
-                message: form.message.trim(),
-              }
-            : announcement,
-        ),
-      );
-      setNotice(`${form.title.trim()} updated.`);
+      await apiFetch(`/announcements/${editingAnnouncementId}`, {
+        method: "PUT",
+        body: JSON.stringify({ title: form.title.trim(), audience: form.audience, status: form.status, pinned: form.pinned, message: form.message.trim() }),
+      });
+      await loadAnnouncements();
+      const message = `${form.title.trim()} updated.`;
+      setNotice(message);
+      showToast(message);
       setEditingAnnouncementId(null);
       setForm({ title: "", audience: "All learners", status: "Draft", pinned: false, message: "" });
       return;
     }
 
-    const nextAnnouncement: Announcement = {
-      id: Date.now(),
-      title: form.title.trim(),
-      audience: form.audience,
-      date: "Jul 27, 2026",
-      status: form.status,
-      pinned: form.pinned,
-      message: form.message.trim(),
-    };
-
-    setAnnouncements((current) => [nextAnnouncement, ...current]);
+    const data = await apiFetch<{ announcement: Announcement }>("/announcements", {
+      method: "POST",
+      body: JSON.stringify({ title: form.title.trim(), audience: form.audience, status: form.status, pinned: form.pinned, message: form.message.trim() }),
+    });
+    await loadAnnouncements();
     setForm({ title: "", audience: "All learners", status: "Draft", pinned: false, message: "" });
-    setNotice(`${nextAnnouncement.title} added.`);
+    const message = `${data.announcement.title} added.`;
+    setNotice(message);
+    showToast("Announcement added.");
   }
 
   function updateForm(key: keyof typeof form, value: string | boolean) {
@@ -143,14 +107,19 @@ export default function AnnouncementsManager() {
       message: announcement.message,
     });
     setEditingAnnouncementId(announcement.id);
-    setNotice(`${announcement.title} loaded for editing.`);
+    const message = `${announcement.title} loaded for editing.`;
+    setNotice(message);
+    showToast(message, "info");
   }
 
-  function confirmDeleteAnnouncement() {
+  async function confirmDeleteAnnouncement() {
     if (!announcementToDelete) return;
 
-    setAnnouncements((current) => current.filter((announcement) => announcement.id !== announcementToDelete.id));
-    setNotice(`${announcementToDelete.title} deleted.`);
+    await apiFetch(`/announcements/${announcementToDelete.id}`, { method: "DELETE" });
+    await loadAnnouncements();
+    const message = `${announcementToDelete.title} deleted.`;
+    setNotice(message);
+    showToast(message);
     setAnnouncementToDelete(null);
   }
 

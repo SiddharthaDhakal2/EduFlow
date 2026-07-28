@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { apiFetch, mediaUrl } from "../../../lib/api";
 
 type TransactionStatus = "Paid" | "Pending" | "Failed";
 
@@ -8,6 +9,8 @@ type Transaction = {
   id: string;
   user: string;
   email: string;
+  avatar?: string;
+  profileImage?: string | null;
   course: string;
   amount: number;
   method: string;
@@ -15,20 +18,16 @@ type Transaction = {
   status: TransactionStatus;
 };
 
-const transactions: Transaction[] = [
-  { id: "TXN-2401", user: "Siddhartha Dhakal", email: "student@eduflow.com", course: "Complete Web Development Bootcamp", amount: 2499, method: "eSewa", date: "Jul 26, 2026", status: "Paid" },
-  { id: "TXN-2402", user: "Maya Gurung", email: "maya@example.com", course: "Python for Data Science", amount: 2499, method: "Khalti", date: "Jul 25, 2026", status: "Paid" },
-  { id: "TXN-2403", user: "Aarav Sharma", email: "aarav@example.com", course: "React Native - Build Mobile Apps", amount: 1999, method: "Card", date: "Jul 24, 2026", status: "Pending" },
-  { id: "TXN-2404", user: "Nisha Thapa", email: "nisha@example.com", course: "Flutter App Development", amount: 1999, method: "eSewa", date: "Jul 23, 2026", status: "Failed" },
-  { id: "TXN-2405", user: "Rohan Chettri", email: "rohan@example.com", course: "Java Programming Masterclass", amount: 1499, method: "Bank Transfer", date: "Jul 22, 2026", status: "Paid" },
-  { id: "TXN-2406", user: "Priyanka Rai", email: "priyanka@example.com", course: "Advanced JavaScript & TypeScript", amount: 1499, method: "Khalti", date: "Jul 21, 2026", status: "Paid" },
-];
-
 const statuses = ["All statuses", "Paid", "Pending", "Failed"];
 
 export default function TransactionsManager() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState(statuses[0]);
+
+  useEffect(() => {
+    apiFetch<{ transactions: Transaction[] }>("/transactions").then((data) => setTransactions(data.transactions));
+  }, []);
 
   const visibleTransactions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -38,13 +37,13 @@ export default function TransactionsManager() {
         normalizedQuery.length === 0 ||
         transaction.user.toLowerCase().includes(normalizedQuery) ||
         transaction.email.toLowerCase().includes(normalizedQuery) ||
-        transaction.course.toLowerCase().includes(normalizedQuery) ||
+        membershipPlan(transaction.course).toLowerCase().includes(normalizedQuery) ||
         transaction.id.toLowerCase().includes(normalizedQuery);
       const matchesStatus = status === "All statuses" || transaction.status === status;
 
       return matchesQuery && matchesStatus;
     });
-  }, [query, status]);
+  }, [query, status, transactions]);
 
   const paidTransactions = transactions.filter((transaction) => transaction.status === "Paid");
   const pendingCount = transactions.filter((transaction) => transaction.status === "Pending").length;
@@ -56,7 +55,7 @@ export default function TransactionsManager() {
       <section>
         <h1 className="text-2xl font-bold text-slate-950">Transactions</h1>
         <p className="mt-1 text-sm text-slate-500">
-          View all course purchase transactions.
+          View all membership payment transactions.
         </p>
       </section>
 
@@ -85,10 +84,10 @@ export default function TransactionsManager() {
       </section>
 
       <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="hidden grid-cols-[0.8fr_1.2fr_1.5fr_0.7fr_0.7fr_0.8fr_0.7fr] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-bold text-slate-500 xl:grid">
+        <div className="hidden grid-cols-[1fr_1.25fr_1fr_0.7fr_0.75fr_0.85fr_0.65fr] gap-4 border-b border-slate-200 bg-blue-50/50 px-5 py-3 text-xs font-bold uppercase text-slate-500 xl:grid">
           <span>ID</span>
           <span>User</span>
-          <span>Course</span>
+          <span>Plan</span>
           <span>Amount</span>
           <span>Method</span>
           <span>Date</span>
@@ -96,33 +95,67 @@ export default function TransactionsManager() {
         </div>
 
         <div className="divide-y divide-slate-100">
-          {visibleTransactions.map((transaction) => (
-            <article
-              key={transaction.id}
-              className="grid gap-4 px-5 py-4 text-sm xl:grid-cols-[0.8fr_1.2fr_1.5fr_0.7fr_0.7fr_0.8fr_0.7fr] xl:items-center"
-            >
-              <TableCell label="ID">{transaction.id}</TableCell>
-              <div>
-                <h2 className="font-bold text-slate-950">{transaction.user}</h2>
-                <p className="mt-1 text-xs text-slate-500">{transaction.email}</p>
-              </div>
-              <TableCell label="Course">{transaction.course}</TableCell>
-              <TableCell label="Amount">NPR {transaction.amount.toLocaleString()}</TableCell>
-              <TableCell label="Method">{transaction.method}</TableCell>
-              <TableCell label="Date">{transaction.date}</TableCell>
-              <div className="flex items-center justify-between xl:block">
-                <span className="text-xs font-bold text-slate-400 xl:hidden">Status</span>
-                <span className={`rounded-md px-2 py-1 text-xs font-bold ${statusClass(transaction.status)}`}>
-                  {transaction.status}
-                </span>
-              </div>
-            </article>
-          ))}
+          {visibleTransactions.length === 0 ? (
+            <div className="px-5 py-10 text-center text-sm font-medium text-slate-500">
+              No real transactions found.
+            </div>
+          ) : (
+            visibleTransactions.map((transaction) => (
+              <article
+                key={transaction.id}
+                className="grid gap-4 px-5 py-4 text-sm transition hover:bg-blue-50/30 xl:grid-cols-[1fr_1.25fr_1fr_0.7fr_0.75fr_0.85fr_0.65fr] xl:items-center"
+              >
+                <TableCell label="ID">
+                  <span className="font-mono text-xs text-slate-700">{transaction.id}</span>
+                </TableCell>
+                <div className="flex min-w-0 items-center gap-3">
+                  <UserAvatar transaction={transaction} />
+                  <div className="min-w-0">
+                    <h2 className="truncate font-bold text-slate-950">{transaction.user}</h2>
+                    <p className="mt-1 truncate text-xs text-slate-500">{transaction.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-4 xl:block">
+                  <span className="text-xs font-bold text-slate-400 xl:hidden">Plan</span>
+                  <span className="inline-flex rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
+                    {membershipPlan(transaction.course)}
+                  </span>
+                </div>
+                <TableCell label="Amount">NPR {transaction.amount.toLocaleString()}</TableCell>
+                <TableCell label="Method">{transaction.method}</TableCell>
+                <TableCell label="Date">{transaction.date}</TableCell>
+                <div className="flex items-center justify-between xl:block">
+                  <span className="text-xs font-bold text-slate-400 xl:hidden">Status</span>
+                  <span className={`rounded-md px-2 py-1 text-xs font-bold ${statusClass(transaction.status)}`}>
+                    {transaction.status}
+                  </span>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
 
     </div>
   );
+}
+
+function UserAvatar({ transaction }: { transaction: Transaction }) {
+  return (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-xs font-bold text-white">
+      {transaction.profileImage ? (
+        <img alt={transaction.user} className="h-full w-full object-cover" src={mediaUrl(transaction.profileImage)} />
+      ) : (
+        transaction.avatar || transaction.user.split(" ").map((part) => part[0]).join("").slice(0, 2)
+      )}
+    </div>
+  );
+}
+
+function membershipPlan(value: string) {
+  if (value.toLowerCase().includes("monthly")) return "Monthly";
+  if (value.toLowerCase().includes("yearly")) return "Yearly";
+  return "Membership";
 }
 
 function SummaryCard({ label, value, icon, tone }: { label: string; value: string; icon: string; tone: string }) {

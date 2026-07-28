@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { apiFetch, mediaUrl } from "../../../lib/api";
 
 type UserStatus = "Active" | "Free";
 
@@ -12,6 +13,7 @@ type User = {
   status: UserStatus;
   courses: number;
   avatar: string;
+  profileImage?: string | null;
   recentLogin: string;
   courseProgress: {
     title: string;
@@ -19,71 +21,17 @@ type User = {
   }[];
 };
 
-const initialUsers: User[] = [
-  {
-    id: 1,
-    name: "Siddhartha Dhakal",
-    email: "student@eduflow.com",
-    joined: "Jan 15, 2025",
-    status: "Active",
-    courses: 3,
-    avatar: "SD",
-    recentLogin: "Jul 27, 2026, 9:15 AM",
-    courseProgress: [
-      { title: "Complete Web Development Bootcamp", progress: "82%" },
-      { title: "Advanced JavaScript & TypeScript", progress: "61%" },
-      { title: "React Native - Build Mobile Apps", progress: "34%" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Aarav Sharma",
-    email: "aarav@example.com",
-    joined: "Feb 08, 2026",
-    status: "Free",
-    courses: 1,
-    avatar: "AS",
-    recentLogin: "Jul 24, 2026, 4:40 PM",
-    courseProgress: [{ title: "Complete Web Development Bootcamp", progress: "24%" }],
-  },
-  {
-    id: 3,
-    name: "Maya Gurung",
-    email: "maya@example.com",
-    joined: "Mar 19, 2026",
-    status: "Active",
-    courses: 5,
-    avatar: "MG",
-    recentLogin: "Jul 26, 2026, 7:05 PM",
-    courseProgress: [
-      { title: "Python for Data Science", progress: "92%" },
-      { title: "Complete Web Development Bootcamp", progress: "86%" },
-      { title: "Java Programming Masterclass", progress: "77%" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Nisha Thapa",
-    email: "nisha@example.com",
-    joined: "Apr 02, 2026",
-    status: "Free",
-    courses: 2,
-    avatar: "NT",
-    recentLogin: "Jul 21, 2026, 11:30 AM",
-    courseProgress: [
-      { title: "Complete Web Development Bootcamp", progress: "45%" },
-      { title: "Flutter App Development", progress: "31%" },
-    ],
-  },
-];
-
 const statuses = ["All users", "Active", "Free"];
 
 export default function UsersManager() {
-  const [users] = useState(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState(statuses[0]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    apiFetch<{ users: User[] }>("/admin/users").then((data) => setUsers(data.users));
+  }, []);
 
   const visibleUsers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -161,9 +109,7 @@ export default function UsersManager() {
                   className="grid gap-4 px-5 py-4 text-sm xl:grid-cols-[1.5fr_1.5fr_0.8fr_0.8fr_0.7fr_70px] xl:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                      {user.avatar}
-                    </div>
+                    <UserAvatar user={user} size="md" />
                     <div className="min-w-0">
                       <h2 className="truncate font-bold text-slate-950">{user.name}</h2>
                       <p className="mt-1 text-xs text-slate-500 xl:hidden">{user.email}</p>
@@ -200,9 +146,7 @@ export default function UsersManager() {
           <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-                  {selectedUser.avatar}
-                </div>
+                <UserAvatar user={selectedUser} size="lg" />
                 <div>
                   <h2 className="text-lg font-bold text-slate-950">{selectedUser.name}</h2>
                   <p className="mt-1 text-sm text-slate-500">{selectedUser.email}</p>
@@ -243,6 +187,20 @@ export default function UsersManager() {
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function UserAvatar({ user, size }: { user: Pick<User, "avatar" | "name" | "profileImage">; size: "md" | "lg" }) {
+  const sizeClass = size === "lg" ? "h-12 w-12" : "h-11 w-11";
+
+  return (
+    <div className={`flex ${sizeClass} shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600 text-sm font-bold text-white`}>
+      {user.profileImage ? (
+        <img alt={user.name} className="h-full w-full object-cover" src={mediaUrl(user.profileImage)} />
+      ) : (
+        user.avatar
       )}
     </div>
   );
