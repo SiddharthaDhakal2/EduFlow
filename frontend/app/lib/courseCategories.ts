@@ -1,3 +1,5 @@
+import { apiFetch } from "./api";
+
 export const courseCategoryStorageKey = "eduflow-course-categories";
 
 export const defaultCourseCategories = [
@@ -9,21 +11,39 @@ export const defaultCourseCategories = [
   "Python",
 ];
 
+export async function fetchCourseCategories() {
+  const data = await apiFetch<{ categories: string[]; counts: Record<string, number> }>("/categories");
+  return data;
+}
+
 export function readSavedCourseCategories() {
-  if (typeof window === "undefined") return defaultCourseCategories;
+  return defaultCourseCategories;
+}
 
-  const saved = window.localStorage.getItem(courseCategoryStorageKey);
-  if (!saved) return defaultCourseCategories;
+export async function createCourseCategory(name: string) {
+  const data = await apiFetch<{ categories: string[] }>("/categories", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  window.dispatchEvent(new Event("course-categories-updated"));
+  return data.categories;
+}
 
-  try {
-    const parsed = JSON.parse(saved);
-    if (!Array.isArray(parsed)) return defaultCourseCategories;
+export async function updateCourseCategory(currentName: string, name: string) {
+  const data = await apiFetch<{ categories: string[] }>(`/categories/${encodeURIComponent(currentName)}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+  window.dispatchEvent(new Event("course-categories-updated"));
+  return data.categories;
+}
 
-    const categories = parsed.filter((category): category is string => typeof category === "string" && category.trim().length > 0);
-    return categories.length > 0 ? categories : defaultCourseCategories;
-  } catch {
-    return defaultCourseCategories;
-  }
+export async function deleteCourseCategory(name: string) {
+  const data = await apiFetch<{ categories: string[] }>(`/categories/${encodeURIComponent(name)}`, {
+    method: "DELETE",
+  });
+  window.dispatchEvent(new Event("course-categories-updated"));
+  return data.categories;
 }
 
 export function saveCourseCategories(categories: string[]) {
