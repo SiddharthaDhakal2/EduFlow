@@ -132,7 +132,7 @@ export default function TestimonialsCarousel() {
           <article
             key={`${item.name}-${index}`}
             data-testimonial-card
-            className="relative flex min-h-[245px] w-full shrink-0 snap-start flex-col rounded-xl border border-blue-100 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md md:w-[calc((100%_-_2.5rem)/3)]"
+            className="relative flex min-h-61.25 w-full shrink-0 snap-start flex-col rounded-xl border border-blue-100 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md md:w-[calc((100%-2.5rem)/3)]"
           >
             <div className="flex items-start gap-4">
               <div

@@ -24,7 +24,7 @@ export default function DashboardShell({
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-950">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[220px] border-r border-slate-200 bg-white lg:flex lg:flex-col">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-55 border-r border-slate-200 bg-white lg:flex lg:flex-col">
         <Link
           href="/"
           className="flex h-14 items-center gap-2.5 border-b border-slate-200 px-5"
@@ -68,7 +68,7 @@ export default function DashboardShell({
         </div>
       </aside>
 
-      <div className="lg:pl-[220px]">
+      <div className="lg:pl-55">
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-5 lg:px-6">
           <Link href="/" className="flex items-center gap-2.5 lg:hidden">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
@@ -88,7 +88,7 @@ export default function DashboardShell({
       </div>
 
       {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 px-4 py-6 backdrop-blur-[8px]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 px-4 py-6 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-5 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -127,7 +127,7 @@ function BookIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-[18px] w-[18px]"
+      className="h-4.5 w-4.5"
       fill="none"
       viewBox="0 0 24 24"
     >
