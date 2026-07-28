@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220" role="img" aria-labelledby="title desc">
+  <title id="title">EduFlow Logo</title>
+  <desc id="desc">A flowing open book symbol for EduFlow.</desc>
+  <defs>
+    <linearGradient id="bookGradient" x1="34" x2="178" y1="39" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="flowGradient" x1="68" x2="158" y1="91" y2="139" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DBEAFE"/>
+      <stop offset="1" stop-color="#A7F3D0"/>
+    </linearGradient>
+  </defs>
+  <path d="M108 40c-34 0-62 27-62 61v62c0 9 7 16 16 16h92c34 0 62-27 62-61V56c0-9-7-16-16-16h-92Z" fill="url(#bookGradient)"/>
+  <path d="M78 82c0-8 6-14 14-14h34c15 0 28 12 28 28v57h-42c-19 0-34-15-34-34V82Z" fill="#FFFFFF" opacity=".96"/>
+  <path d="M154 96c0-15 13-28 28-28h4v62c0 13-10 23-23 23h-9V96Z" fill="#FFFFFF" opacity=".88"/>
+  <path d="M94 98c28-13 57-13 86 0M94 122c28-11 57-11 86 0" stroke="url(#flowGradient)" stroke-width="12" stroke-linecap="round"/>
+  <path d="M115 68v85" stroke="#2563EB" stroke-width="5" stroke-linecap="round" opacity=".28"/>
+</svg>
