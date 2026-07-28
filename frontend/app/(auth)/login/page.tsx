@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Header from "../../components/Header";
+import { apiFetch, setSession, type User } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 
 const stats = [
   { value: "42k+", label: "Learners" },
@@ -15,14 +17,28 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    router.push("/user/dashboard");
-  }
+    setError("");
+    setIsSubmitting(true);
 
-  function handleAdminLogin() {
-    router.push("/admin/dashboard");
+    try {
+      const data = await apiFetch<{ token: string; user: User }>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+      setSession(data.token, data.user);
+      showToast("Login successful.");
+      router.push(data.user.role === "admin" ? "/admin/dashboard" : "/user/dashboard");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed.";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -42,29 +58,7 @@ export default function LoginPage() {
 
             <div className="hero-copy relative mx-auto flex h-full max-w-md flex-col justify-center">
               <Link href="/" className="absolute top-0 flex w-fit items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/15">
-                  <svg
-                    aria-hidden="true"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M5 5.75A2.75 2.75 0 0 1 7.75 3H19v14.5H7.75A2.75 2.75 0 0 0 5 20.25V5.75Z"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M5 5.75A2.75 2.75 0 0 0 2.25 3H2v14.5h.25A2.75 2.75 0 0 1 5 20.25M8.5 7H16M8.5 10.5H16"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </span>
+                <img alt="EduFlow" className="h-9 w-9" src="/eduflow-logo.svg" />
                 <span className="text-xl font-bold">EduFlow</span>
               </Link>
 
@@ -140,19 +134,18 @@ export default function LoginPage() {
 
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
                 >
-                  Sign In
+                  {isSubmitting ? "Signing in..." : "Sign In"}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleAdminLogin}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:border-blue-600"
-                >
-                  Login as Admin
-                </button>
               </form>
+              {error ? (
+                <p className="mt-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                  {error}
+                </p>
+              ) : null}
 
               <p className="mt-5 text-center text-sm text-slate-500">
                 Don&apos;t have an account?{" "}

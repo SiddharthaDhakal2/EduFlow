@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Header from "../../components/Header";
+import { apiFetch, type User } from "../../lib/api";
+import { showToast } from "../../lib/toast";
 
 const benefits = [
   "Access 2 free courses instantly",
@@ -18,10 +20,32 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    router.push("/user/dashboard");
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const data = await apiFetch<{ token: string; user: User }>("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ name, email, password }),
+      });
+      showToast(`Account created for ${data.user.email}. Please login.`);
+      router.push("/login");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Registration failed.";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -40,29 +64,7 @@ export default function SignupPage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.14),transparent_28%),linear-gradient(135deg,rgba(37,99,235,0.96),rgba(30,64,175,0.96))]" />
             <div className="hero-copy relative mx-auto flex h-full max-w-md flex-col justify-center">
               <Link href="/" className="absolute top-0 flex w-fit items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/15">
-                  <svg
-                    aria-hidden="true"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M5 5.75A2.75 2.75 0 0 1 7.75 3H19v14.5H7.75A2.75 2.75 0 0 0 5 20.25V5.75Z"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M5 5.75A2.75 2.75 0 0 0 2.25 3H2v14.5h.25A2.75 2.75 0 0 1 5 20.25M8.5 7H16M8.5 10.5H16"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </span>
+                <img alt="EduFlow" className="h-9 w-9" src="/eduflow-logo.svg" />
                 <span className="text-xl font-bold">EduFlow</span>
               </Link>
 
@@ -78,8 +80,8 @@ export default function SignupPage() {
                 <ul className="mt-6 space-y-3 text-sm text-blue-50">
                   {benefits.map((item) => (
                     <li key={item} className="flex items-center gap-3">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/35 text-[10px] font-bold">
-                        OK
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/35 text-white">
+                        <CheckCircleIcon />
                       </span>
                       {item}
                     </li>
@@ -171,11 +173,17 @@ export default function SignupPage() {
 
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
                 >
-                  Create Account
+                  {isSubmitting ? "Creating account..." : "Create Account"}
                 </button>
               </form>
+              {error ? (
+                <p className="mt-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+                  {error}
+                </p>
+              ) : null}
 
               <p className="mt-4 text-center text-sm text-slate-500">
                 Already have an account?{" "}
@@ -188,6 +196,14 @@ export default function SignupPage() {
         </div>
       </main>
     </>
+  );
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+      <path d="m6 12 4 4 8-8" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+    </svg>
   );
 }
 
