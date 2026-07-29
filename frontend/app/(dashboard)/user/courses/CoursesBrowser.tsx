@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch, mediaUrl, type Course } from "../../../lib/api";
 import { fetchCourseCategories } from "../../../lib/courseCategories";
@@ -9,6 +9,7 @@ import { showToast } from "../../../lib/toast";
 const accessFilters = ["All", "Free", "Paid"];
 
 export default function CoursesBrowser() {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState(["All Courses"]);
   const [selectedCategory, setSelectedCategory] = useState("All Courses");
@@ -16,6 +17,7 @@ export default function CoursesBrowser() {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [hasMembership, setHasMembership] = useState(false);
+  const [enrollingSlug, setEnrollingSlug] = useState("");
 
   useEffect(() => {
     async function refreshData() {
@@ -54,6 +56,19 @@ export default function CoursesBrowser() {
       })
       .sort((a, b) => b.id - a.id);
   }, [courses, query, selectedAccess, selectedCategory]);
+
+  async function enrollInCourse(course: Course) {
+    setEnrollingSlug(course.slug);
+    try {
+      await apiFetch(`/courses/${encodeURIComponent(course.slug)}/enroll`, { method: "POST" });
+      showToast("Enrolled successfully.");
+      router.push(`/user/courses/${encodeURIComponent(course.slug)}`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Unable to enroll in this course.", "error");
+    } finally {
+      setEnrollingSlug("");
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -171,12 +186,14 @@ export default function CoursesBrowser() {
                   Enroll Now
                 </button>
               ) : (
-                <Link
-                  href={`/user/courses/${course.slug}`}
+                <button
+                  type="button"
+                  disabled={enrollingSlug === course.slug}
+                  onClick={() => enrollInCourse(course)}
                   className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
                 >
-                  Enroll Now
-                </Link>
+                  {enrollingSlug === course.slug ? "Enrolling..." : "Enroll Now"}
+                </button>
               )}
             </div>
             </article>
