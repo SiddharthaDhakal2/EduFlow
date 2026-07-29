@@ -24,35 +24,46 @@ type PaymentRecord = {
 export default function MembershipPage() {
   const [membership, setMembership] = useState<{ active?: boolean; startDate?: string; expiryDate?: string }>({ active: false });
   const [paymentHistory, setPaymentHistory] = useState<PaymentRecord[]>([]);
-  const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly" | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<"khalti" | "esewa" | null>(null);
   const [isPaying, setIsPaying] = useState(false);
-  const [modalError, setModalError] = useState("");
-
-  async function loadMembership() {
-    const data = await apiFetch<{ membership: typeof membership; payments: PaymentRecord[] }>("/membership");
-    setMembership(data.membership);
-    setPaymentHistory(data.payments);
-  }
+  const [checkoutError, setCheckoutError] = useState("");
 
   useEffect(() => {
-    loadMembership();
+    let isActive = true;
+
+    apiFetch<{ membership: typeof membership; payments: PaymentRecord[] }>("/membership").then((data) => {
+      if (!isActive) return;
+      setMembership(data.membership);
+      setPaymentHistory(data.payments);
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
-  function closePlanModal() {
-    setShowPlanModal(false);
+  function openCheckout() {
+    setShowCheckout(true);
+    setSelectedPlan((current) => current || "monthly");
+    setSelectedPayment("khalti");
+    setCheckoutError("");
+    setError("");
+  }
+
+  function closeCheckout() {
+    setShowCheckout(false);
     setSelectedPlan(null);
     setSelectedPayment(null);
     setIsPaying(false);
-    setModalError("");
+    setCheckoutError("");
   }
 
   function chooseEsewa() {
     setSelectedPayment("esewa");
-    setModalError("");
+    setCheckoutError("");
     showToast("eSewa payment is coming soon.", "info");
   }
 
@@ -60,7 +71,7 @@ export default function MembershipPage() {
     if (!selectedPlan || selectedPayment !== "khalti") return;
 
     setError("");
-    setModalError("");
+    setCheckoutError("");
     setIsPaying(true);
 
     try {
@@ -78,14 +89,13 @@ export default function MembershipPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unable to start Khalti payment.";
       setError(message);
-      setModalError(message);
+      setCheckoutError(message);
       setIsPaying(false);
     }
   }
 
   return (
     <div className="max-w-6xl space-y-5">
-      {notice ? <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">{notice}</div> : null}
       {error ? <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</div> : null}
       <section>
         <h1 className="text-2xl font-bold text-slate-950">Membership</h1>
@@ -134,7 +144,7 @@ export default function MembershipPage() {
         ) : (
           <button
             type="button"
-            onClick={() => setShowPlanModal(true)}
+            onClick={openCheckout}
             className="mt-7 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-700"
           >
             <CardIcon />
@@ -142,6 +152,111 @@ export default function MembershipPage() {
           </button>
         )}
       </section>
+
+      {showCheckout && !membership.active ? (
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-slate-950">Buy EduFlow Premium</h2>
+              <p className="mt-1 text-sm text-slate-500">Choose your plan and payment method to continue.</p>
+            </div>
+            <button
+              className="h-10 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              type="button"
+              onClick={closeCheckout}
+            >
+              Back
+            </button>
+          </div>
+
+          <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <CardIcon />
+              </span>
+              <div>
+                <p className="text-sm font-bold text-slate-950">Premium includes every paid course</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Learn without limits, keep progress tracking, and unlock certificates while your membership is active.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <h3 className="text-sm font-bold text-slate-950">1. Select plan</h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <PlanButton
+                amount="NPR 500"
+                disabled={isPaying}
+                label="Monthly"
+                selected={selectedPlan === "monthly"}
+                period="/ month"
+                detail="Best for short-term learning goals"
+                onClick={() => setSelectedPlan("monthly")}
+              />
+              <PlanButton
+                amount="NPR 2,999"
+                disabled={isPaying}
+                label="Yearly"
+                selected={selectedPlan === "yearly"}
+                period="/ year"
+                detail="Best value for long-term access"
+                badge="Save more"
+                onClick={() => setSelectedPlan("yearly")}
+              />
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <h3 className="text-sm font-bold text-slate-950">2. Select payment method</h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <PaymentButton
+                label="Khalti"
+                description="Pay securely using Khalti sandbox."
+                selected={selectedPayment === "khalti"}
+                disabled={isPaying}
+                onClick={() => {
+                  setSelectedPlan((current) => current || "monthly");
+                  setSelectedPayment("khalti");
+                  setCheckoutError("");
+                }}
+              />
+              <PaymentButton
+                label="eSewa"
+                description="This payment option will be available soon."
+                selected={selectedPayment === "esewa"}
+                disabled={isPaying}
+                onClick={chooseEsewa}
+              />
+            </div>
+          </div>
+
+          {checkoutError ? (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              {checkoutError}
+            </div>
+          ) : null}
+
+          <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button
+              className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              type="button"
+              onClick={closeCheckout}
+            >
+              Cancel
+            </button>
+            <button
+              className="h-11 rounded-lg bg-blue-600 px-5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+              disabled={!selectedPlan || selectedPayment !== "khalti" || isPaying}
+              type="button"
+              onClick={buyMembership}
+            >
+              {isPaying ? "Redirecting..." : "Continue to Khalti"}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -220,111 +335,6 @@ export default function MembershipPage() {
         </section>
       ) : null}
 
-      {showPlanModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 px-4 py-6 backdrop-blur-[8px]">
-          <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white p-5 shadow-xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-bold text-slate-950">Buy EduFlow Premium</h2>
-                <p className="mt-1 text-sm text-slate-500">Choose your plan and payment method to continue.</p>
-              </div>
-              <button
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50"
-                type="button"
-                onClick={closePlanModal}
-              >
-                x
-              </button>
-            </div>
-
-            <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-              <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
-                  <CardIcon />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-slate-950">Premium includes every paid course</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Learn without limits, keep progress tracking, and unlock certificates while your membership is active.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <h3 className="text-sm font-bold text-slate-950">1. Select plan</h3>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <PlanButton
-                amount="NPR 500"
-                disabled={isPaying}
-                label="Monthly"
-                selected={selectedPlan === "monthly"}
-                period="/ month"
-                detail="Best for short-term learning goals"
-                onClick={() => setSelectedPlan("monthly")}
-              />
-              <PlanButton
-                amount="NPR 2,999"
-                disabled={isPaying}
-                label="Yearly"
-                selected={selectedPlan === "yearly"}
-                period="/ year"
-                detail="Best value for long-term access"
-                badge="Save more"
-                onClick={() => setSelectedPlan("yearly")}
-              />
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <h3 className="text-sm font-bold text-slate-950">2. Select payment method</h3>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <PaymentButton
-                  label="Khalti"
-                  description="Pay securely using Khalti sandbox."
-                  selected={selectedPayment === "khalti"}
-                  disabled={isPaying}
-                  onClick={() => {
-                    setSelectedPayment("khalti");
-                    setModalError("");
-                  }}
-                />
-                <PaymentButton
-                  label="eSewa"
-                  description="This payment option will be available soon."
-                  selected={selectedPayment === "esewa"}
-                  disabled={isPaying}
-                  onClick={chooseEsewa}
-                />
-              </div>
-            </div>
-
-            {modalError ? (
-              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-                {modalError}
-              </div>
-            ) : null}
-
-            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                className="h-11 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-                type="button"
-                onClick={closePlanModal}
-              >
-                Cancel
-              </button>
-              <button
-                className="h-11 rounded-lg bg-blue-600 px-5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-                disabled={!selectedPlan || selectedPayment !== "khalti" || isPaying}
-                type="button"
-                onClick={buyMembership}
-              >
-                {isPaying ? "Redirecting..." : "Continue to Khalti"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
