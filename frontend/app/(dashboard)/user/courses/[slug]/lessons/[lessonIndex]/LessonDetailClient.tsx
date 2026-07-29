@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { apiFetch, mediaUrl, type Course } from "../../../../../../lib/api";
 import MarkAsReadButton from "./MarkAsReadButton";
@@ -73,7 +74,7 @@ export default function LessonDetailClient({ slug, lessonIndex }: { slug: string
 
       {lesson.textContent ? (
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm leading-7 text-slate-600">{lesson.textContent}</p>
+          <LessonTextContent content={lesson.textContent} />
         </section>
       ) : null}
 
@@ -113,6 +114,110 @@ export default function LessonDetailClient({ slug, lessonIndex }: { slug: string
         </div>
       </section>
     </div>
+  );
+}
+
+function LessonTextContent({ content }: { content: string }) {
+  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  const elements: ReactNode[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index].trim();
+
+    if (!line) {
+      index += 1;
+      continue;
+    }
+
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
+    if (headingMatch) {
+      elements.push(
+        <h2 key={elements.length} className="mt-5 first:mt-0 text-xl font-bold leading-tight text-slate-950">
+          {headingMatch[2]}
+        </h2>,
+      );
+      index += 1;
+      continue;
+    }
+
+    if (isPlainHeading(lines, index)) {
+      elements.push(
+        <h2 key={elements.length} className="mt-5 first:mt-0 text-xl font-bold leading-tight text-slate-950">
+          {line}
+        </h2>,
+      );
+      index += 1;
+      continue;
+    }
+
+    const bulletItems: string[] = [];
+    while (index < lines.length) {
+      const bulletMatch = lines[index].trim().match(/^[-*•]\s+(.+)$/);
+      if (!bulletMatch) break;
+      bulletItems.push(bulletMatch[1]);
+      index += 1;
+    }
+    if (bulletItems.length) {
+      elements.push(
+        <ul key={elements.length} className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-slate-600">
+          {bulletItems.map((item, itemIndex) => (
+            <li key={`${item}-${itemIndex}`}>{item}</li>
+          ))}
+        </ul>,
+      );
+      continue;
+    }
+
+    const numberedItems: string[] = [];
+    while (index < lines.length) {
+      const numberedMatch = lines[index].trim().match(/^\d+[.)]\s+(.+)$/);
+      if (!numberedMatch) break;
+      numberedItems.push(numberedMatch[1]);
+      index += 1;
+    }
+    if (numberedItems.length) {
+      elements.push(
+        <ol key={elements.length} className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-7 text-slate-600">
+          {numberedItems.map((item, itemIndex) => (
+            <li key={`${item}-${itemIndex}`}>{item}</li>
+          ))}
+        </ol>,
+      );
+      continue;
+    }
+
+    const paragraphLines: string[] = [];
+    while (index < lines.length && lines[index].trim()) {
+      const currentLine = lines[index].trim();
+      if (currentLine.match(/^(#{1,3})\s+(.+)$/) || currentLine.match(/^[-*•]\s+(.+)$/) || currentLine.match(/^\d+[.)]\s+(.+)$/)) break;
+      paragraphLines.push(currentLine);
+      index += 1;
+    }
+
+    elements.push(
+      <p key={elements.length} className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
+        {paragraphLines.join("\n")}
+      </p>,
+    );
+  }
+
+  return <div className="space-y-1">{elements}</div>;
+}
+
+function isPlainHeading(lines: string[], index: number) {
+  const line = lines[index].trim();
+  const previousLine = index === 0 ? "" : lines[index - 1].trim();
+  const nextLine = lines[index + 1]?.trim() || "";
+
+  return (
+    Boolean(line) &&
+    Boolean(nextLine) &&
+    !previousLine &&
+    line.length <= 80 &&
+    !line.match(/[.!?:;]$/) &&
+    !line.match(/^[-*•]\s+(.+)$/) &&
+    !line.match(/^\d+[.)]\s+(.+)$/)
   );
 }
 
